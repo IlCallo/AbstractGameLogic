@@ -6,7 +6,7 @@ public class MoneyZone extends BaseZone {
     private int mMoney;
 
     public MoneyZone(int id, int cost, int money) {
-        super(id, cost, "Earn " + money + "money");
+        super(id, cost, "Earn " + money + " money");
         mMoney = money;
     }
 

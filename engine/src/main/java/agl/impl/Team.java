@@ -7,8 +7,8 @@ public class Team extends aglGroup {
     private Objective mObjective;
     private int mMoney;
 
-    public Team(String name) {
-        super(name);
+    public Team(String id, String name) {
+        super(id, name);
         mMoney = 0;
     }
 

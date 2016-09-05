@@ -1,21 +1,26 @@
 package agl.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class aglGroup {
+    private String mId;
     private String mName;
-    private List<aglActor> mMembers;
+    private ArrayList<aglActor> mMembers;
 
-    public aglGroup(String name) {
+    public aglGroup(String id, String name) {
+        mId = id;
         mName = name;
+
+        mMembers = new ArrayList<>();
+    }
+
+    public String getId() {
+        return mId;
     }
 
     public String getName() {
         return mName;
-    }
-
-    public void setName(String name) {
-        mName = name;
     }
 
     public List<aglActor> getMembers() {

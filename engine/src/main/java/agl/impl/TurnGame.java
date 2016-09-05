@@ -13,12 +13,16 @@ import com.google.firebase.database.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class TurnGame {
+
+public class TurnGame implements Runnable {
+    private static final Logger LOG = Logger.getLogger(TurnGame.class.getName());
+
     private static final int ZONES_NUM = 9;
 
     private static final int INITIAL_MONEY = 10;
@@ -57,6 +61,11 @@ public class TurnGame {
     private DatabaseReference mRef;
     private GeoFire mGeo;
 
+    private GeoLocation mCenter;
+    private double mDiameter;
+
+    private boolean mTerminate;
+
     public TurnGame(GeoLocation center, double diameter, DatabaseReference ref, GeoFire geo) {
         mRef = ref;
         mGeo = geo;
@@ -65,49 +74,22 @@ public class TurnGame {
         mUnits = new ArrayList<>();
         mEvents = new ArrayList<>();
 
-        mRef.child("game/status").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                switch ((String) dataSnapshot.getValue()) {
-                    case INITIALIZE_PHASE:
-                    default:
-                        initialize(center, diameter);
-                        break;
-                    case PREPARE_PHASE:
-                        prepare();
-                        break;
-                    case START_PHASE:
-                        start();
-                        break;
-                    case PAUSE_PHASE:
-                        pause();
-                        break;
-                    case RESUME_PHASE:
-                        resume();
-                        break;
-                    case END_PHASE:
-                        end();
-                        break;
-                }
-            }
+        mCenter = center;
+        mDiameter = diameter;
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        mTerminate = false;
     }
 
     public static void main(String[] args) {
         // get input stream
         FileInputStream fis = null;
         try {
-            fis = new FileInputStream("SeriousGames-6953f1c36618.json");
+            fis = new FileInputStream("engine/SeriousGames-6953f1c36618.json");
         } catch (FileNotFoundException e) {
-            System.out.println(System.getProperty("user.dir"));
-            System.out.println(Paths.get(".").toAbsolutePath().normalize().toString());
             e.printStackTrace();
         }
+
+        LOG.fine("Reading Firebase database token");
 
         // connect to firebase
         FirebaseOptions options = new FirebaseOptions.Builder()
@@ -116,13 +98,15 @@ public class TurnGame {
                 .build();
         FirebaseApp.initializeApp(options);
 
+        LOG.fine("Firebase database access initialized");
+
         GeoLocation center = new GeoLocation(44.698610, 10.630919); // Reggio Emilia center
         double diameter = 1.6; // Reggio Emilia historical center diameter
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
         // start new game on his own thread
-        new TurnGame(center, diameter, ref, new GeoFire(ref.child("geofire")));
+        (new Thread(new TurnGame(center, diameter, ref, new GeoFire(ref.child("geofire"))))).start();
     }
 
     public int getTurn() {
@@ -157,12 +141,58 @@ public class TurnGame {
         mFog = true;
     }
 
+    @Override
+    public void run() {
+        LOG.log(Level.FINE, "Game started");
+
+        mRef.child("game/status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String phase = (String) dataSnapshot.getValue();
+                if (phase == null) {
+                    mRef.child("game/status").setValue(INITIALIZE_PHASE);
+                    return;
+                }
+
+                LOG.log(Level.FINE, "Current phase is {0}", phase);
+
+                switch (phase) {
+                    case INITIALIZE_PHASE:
+                        initialize(mCenter, mDiameter);
+                        break;
+                    case PREPARE_PHASE:
+                        prepare();
+                        break;
+                    case START_PHASE:
+                        start();
+                        break;
+                    case PAUSE_PHASE:
+                        pause();
+                        break;
+                    case RESUME_PHASE:
+                        resume();
+                        break;
+                    case END_PHASE:
+                        end();
+                        break;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                LOG.log(Level.SEVERE, databaseError.toException().toString(), databaseError.toException());
+            }
+        });
+
+        do {
+        } while (!mTerminate);
+    }
+
     private void initialize(GeoLocation center, double diameter) {
         mTurn = 0;
         mEventProbability = 0.25;
 
         // Initialize general game info
-        mRef.child("game/status").setValue(INITIALIZE_PHASE);
         mRef.child("game/turn").setValue(mTurn);
         mRef.child("game/event/probability").setValue(mEventProbability);
 
@@ -175,6 +205,9 @@ public class TurnGame {
         mEvents.add(new FireEvent());
         mEvents.add(new FogEvent());
         mEvents.add(new TaxEvent());
+
+        // Clean previous data
+        mRef.child("game/event/possible").setValue(null);
 
         // Load events reference
         for (BaseEvent event : mEvents) {
@@ -221,6 +254,10 @@ public class TurnGame {
 
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                if (databaseError != null) {
+                    LOG.log(Level.SEVERE, databaseError.toException().toString(), databaseError.toException());
+                }
+
                 // Extract the starting zones
                 ArrayList<BaseZone> possibleStartingZones = new ArrayList<>();
 
@@ -231,6 +268,9 @@ public class TurnGame {
                     } else {
                         possibleStartingZones.add(zone);
                     }
+
+                    LOG.log(Level.FINE, "Starting location n. {0} will be zone {1} which is a {2}",
+                            new Object[]{i, zone.getId(), zone.getClass().toString()});
                 }
 
                 // Get teams
@@ -238,7 +278,7 @@ public class TurnGame {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // Number of units to wait
-                        int unitsToWait = 0;
+                        long unitsToWait = 0;
 
                         // Define objective placeholder
                         ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(OBJECTIVE_CHAOS, OBJECTIVE_CONTROL,
@@ -247,8 +287,7 @@ public class TurnGame {
                         // Cycle all registered teams
                         for (DataSnapshot ds1 : dataSnapshot.getChildren()) {
                             // Get team name and create the instance
-                            String teamName = (String) ds1.child("name").getValue();
-                            Team team = new Team(teamName);
+                            Team team = new Team(ds1.getKey(), (String) ds1.child("name").getValue());
 
                             // Cycle all team members
                             for (DataSnapshot ds2 : ds1.child("members").getChildren()) {
@@ -297,23 +336,27 @@ public class TurnGame {
 
                             // Set the objective
                             team.setObjective(objective);
-                            mRef.child("team/" + teamName).child("objective").setValue(o);
+                            mRef.child("team/" + team.getId() + "/objective").setValue(o);
 
                             // Set initial money
                             team.earnMoney(INITIAL_MONEY);
-                            mRef.child("team/" + teamName).child("money").setValue(INITIAL_MONEY);
+                            mRef.child("team/" + team.getId() + "/money").setValue(INITIAL_MONEY);
 
                             // Add the team to the team lists
                             mTeams.add(team);
+
+                            LOG.log(Level.FINE, "Team {0} initialized with objective => {1}",
+                                    new Object[]{team.getName(), team.getObjective().getClass().toString()});
                         }
 
                         mRef.child("game/unitsToWait").setValue(unitsToWait);
-                        prepare();
+
+                        mRef.child("game/status").setValue(PREPARE_PHASE);
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        LOG.log(Level.SEVERE, databaseError.toException().toString(), databaseError.toException());
                     }
                 });
             }
@@ -321,18 +364,16 @@ public class TurnGame {
     }
 
     private void prepare() {
-        mRef.child("game/status").setValue(PREPARE_PHASE);
-
         // Add listener for missing units until the game starts
         mRef.child("game/unitsToWait").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if ((int) dataSnapshot.getValue() == 0) {
+                if ((long) dataSnapshot.getValue() == 0) {
                     mRef.child("game/unitsToWait").removeEventListener(this);
 
                     // TODO Add all Firebase listeners and start the game
 
-                    start();
+                    mRef.child("game/status").setValue(START_PHASE);
                 }
             }
 
@@ -344,13 +385,14 @@ public class TurnGame {
     }
 
     private void start() {
-        mRef.child("game/status").setValue(START_PHASE);
+        // DUMMY
+        mTerminate = true;
 
         while (!meetsEndingCriteria()) {
             turn();
         }
 
-        end();
+        mRef.child("game/status").setValue(END_PHASE);
     }
 
     private void pause() {

@@ -31,6 +31,9 @@ public abstract class BaseZone implements PowerUp {
         mChaotic = false;
         mControlMap = new HashMap<>();
         mNearZones = new ArrayList<>();
+
+        mBuildings = new ArrayList<>();
+        mUnits = new ArrayList<>();
     }
 
     public int getId() {
@@ -134,8 +137,8 @@ public abstract class BaseZone implements PowerUp {
     }
 
     private GeoLocation calculateCentroid(ArrayList<GeoLocation> perimeter) {
-        double x = 0.;
-        double y = 0.;
+        double x = 0.0;
+        double y = 0.0;
         int pointCount = perimeter.size();
         for (GeoLocation vertex : perimeter) {
             x += vertex.latitude;

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ExplosionEvent extends BaseEvent {
     public ExplosionEvent() {
-        super("Explosion", "An explosion destroy buildings in an zone");
+        super("explosion", "An explosion destroy buildings in an zone");
     }
 
     @Override
