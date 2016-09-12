@@ -11,7 +11,6 @@ public abstract class aglRole {
     }
 
     public aglRole(String name, List<aglAction> actions) {
-
         mName = name;
         mActions = actions;
     }

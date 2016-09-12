@@ -18,11 +18,11 @@ public class BoardFactory {
 
     /**
      * @param center   A GeoPosition object which will be the center of the board
-     * @param diameter Diameter of the board, in km
+     * @param radius Diameter of the board, in km
      * @return The Board instance
      */
-    public static Board createBoard(GeoLocation center, double diameter, List<BaseZone> zones) {
-        LOG.log(Level.FINE, "Board will be centered on {0} and will have a diameter of {1} km", new Object[]{center, diameter});
+    public static Board createBoard(GeoLocation center, double radius, List<BaseZone> zones) {
+        LOG.log(Level.FINE, "Board will be centered on {0} and will have a radius of {1} km", new Object[]{center, radius});
 
         // Allocate GeoPosition arrays for the zones points
         GeoLocation[][] coordinates = new GeoLocation[9][];
@@ -35,6 +35,9 @@ public class BoardFactory {
         coordinates[6] = new GeoLocation[12];
         coordinates[7] = new GeoLocation[12];
         coordinates[8] = new GeoLocation[12];
+
+        // Radius of different rings has been calculated to mantain an equal area for all zones
+        // Central area : 0.33; first ring: 0.33 + 0.412 = 0.7432; last ring: 0.33 + 0.412 + 0.2568 = 1
 
         // Zones delimiters:
         // central area, 8 points, 45° between each all distant 1/10D from center
@@ -49,8 +52,7 @@ public class BoardFactory {
             // TODO there must be a way to relate this to the 360° repeat, probably via trigonometric functions
             int precedingZoneNum = (currentZoneNum == 1) ? 4 : currentZoneNum - 1;
 
-            // We must put the denominator as a double or the result of 1/10 will be always 0
-            GeoLocation vertex = calcDest(center, 1 / 10.0 * diameter, a);
+            GeoLocation vertex = calcDest(center, 0.33 * radius, a);
 
             // save vertex for the central area
             coordinates[0][i] = vertex;
@@ -81,8 +83,7 @@ public class BoardFactory {
             //LOG.log( Level.FINER, "currentZone: {0}, precedingZone: {1}, extCurrentZone: {2}, extPrecedingZone: {3}, angle: {4}",
             // new Object[]{currentZoneNum, precedingZoneNum, extCurrentZoneNum, extPrecedingZoneNum, a});
 
-            // We must put the denominator as a double or the result of 3/10 will be always 0
-            GeoLocation vertex = calcDest(center, 3 / 10.0 * diameter, a);
+            GeoLocation vertex = calcDest(center, 0.7432 * radius, a);
 
             // degree of shift inside a single zone of first ring large arc
             float relativeShift = a % 90;
@@ -99,7 +100,10 @@ public class BoardFactory {
                 coordinates[extPrecedingZoneNum][2] = vertex;
             } else {
                 // calculate the vertex index relative to the large arc of the zone in first ring
-                int index = (int) (relativeShift / 22.5);
+                // we must do (90 - relativeShift) because we are checking it in reverse order,
+                //    otherwise the index would be wrong for points 4 and 6
+                int index = (int) ((90 - relativeShift) / 22.5);
+
                 // saves it in the right index
                 coordinates[currentZoneNum][index + 3] = vertex;
 
@@ -124,15 +128,13 @@ public class BoardFactory {
         // calc points of large arc of second ring
         // the range should actually be [-45,315] otherwise the borders of the zones won't be aligned with previous calc,
         // but we keep the [0,360] and shift -45° only when we must find the vertex position because it's more comfortable
-        for (int a = 0, i = 0; a != 360; a += 15, i++) {
-            int currentZoneNum = (a < 315) ? (a + 45) / 90 + 5 : 5;
+        for (int a = 0; a != 360; a += 15) {
+            int currentZoneNum = a / 90 + 5;
             // TODO there must be a way to relate this to the 360° repeat, probably via trigonometric functions
             int precedingZoneNum = (currentZoneNum == 5) ? 8 : currentZoneNum - 1;
 
-            //LOG.log( Level.FINER, "currentZone: {0}, precedingZone: {1}, angle: {2}", new Object[]{currentZoneNum, precedingZoneNum, a});
-
             // we shift 45° back to start aligned with the zones border
-            GeoLocation vertex = calcDest(center, diameter / 2, a - 45);
+            GeoLocation vertex = calcDest(center, radius, a - 45);
 
             int relativeShift = a % 90;
 
@@ -156,7 +158,7 @@ public class BoardFactory {
 
         // Translate array of points to list of points and add them to zones
         for (int i = 0; i < 9; i++) {
-            ArrayList<GeoLocation> perimeter = new ArrayList<>(Arrays.asList(coordinates[0]));
+            ArrayList<GeoLocation> perimeter = new ArrayList<>(Arrays.asList(coordinates[i]));
             zones.get(i).setPerimeter(perimeter);
         }
 
@@ -172,8 +174,8 @@ public class BoardFactory {
         zones.get(7).setNearZones(new ArrayList<>(Arrays.asList(zones.get(3), zones.get(4), zones.get(6), zones.get(8))));
         zones.get(8).setNearZones(new ArrayList<>(Arrays.asList(zones.get(4), zones.get(1), zones.get(7), zones.get(5))));
 
-        // create
-        return new Board(zones);
+        // Create and return the board
+        return new Board(center, radius, zones);
     }
 
     private static GeoLocation calcDest(GeoLocation start, double distance, double bearing) {
