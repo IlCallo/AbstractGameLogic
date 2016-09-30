@@ -1,0 +1,124 @@
+\chapter{Implementation}
+
+	\section{Infrastructure}
+		
+		\subsection{Team management}
+		
+			Considering the kind of event bounded to the game usage, something gets clearly on mind: the team registration must be done long \emph{before} the event.
+			
+			For this, a simple website will be set-up. 
+			Teams will be able to enrol for events, specifying the emails of all team members and a reference person which will take care of the team management (eg. player removal or substitution).
+			In this way organizers will be able to directly communicate with all players of a given event.
+		
+		\subsection{Data storage and manipulation}
+			
+			Instead of relying on an old-style SQL database accessed from a PHP/Java environment, the data management is achieved using a new platform: Firebase.
+			Firebase does a great job keeping data in sync between various devices and offer a powerful set of API, together with a strong system of data access rules.
+			The only flaw is that queries on data are not so simple to perform and must be done using nested calls to the database.
+		
+		\subsection{Game}
+		
+			Being backed by Firebase I initially thought a backend server wasn't really needed, and i could implement some sort of all-in-app game logic.
+			Unluckily, I soon realized that game phases, together with some game conditions checks, needed a centralized code to be performed.
+			Actually this constraint is more a design-driven choice than a mandatory one: all the game logic \emph{could} be realized directly on the app, synchronizing between all devices, but this would result in messy code and open some security issues with which I would have needed to deal in the final stages of the project.
+			Considering this, I decided to follow the KISS (Keep It Simple, Stupid) approach and separate the two aspects of the game.
+			
+			\subsubsection{Game logic}
+			
+				To support the game logic, a Java task on the server will run in loop interacting with real time database observing the actions being made by the players and eventually acting on his own to modify the game status.
+				
+				It takes care of:
+				\begin{itemize}
+					\item \textbf{initialization:} preparatory steps to execute before a match take place (initial status, board set-up);
+					\item \textbf{phases:} manages phase changes and the timers associated with it;
+					\item \textbf{objectives:} check every turn if a team reached his objective;
+					\item \textbf{events:} manages the probability of an event to take place, its random choice between the available ones and applies his effects;
+					\item \textbf{status reset:} every temporary status changes (zones power-ups and events effects) is reset to his original status at the end of turn;
+					\item \textbf{power-up:} applies effects of the power-ups;
+					\item \textbf{log:} record all match actions and operations in order to enable post-match studies and replays.  
+				\end{itemize}
+				
+				The many timers that the game logic will need to share with the app will be saved on the database as their expiration date. In this way it's possible to every device in any moment to calculate the missing time to the expiration and set an internal time-out on their own.
+			
+			\subsubsection{Players logic}
+			
+				Player logic, instead, is managed by the app running on every device, which communicates directly with the real time database.
+				
+				It takes care of:
+				\begin{itemize}
+					\item \textbf{messenger:} a dedicated messenger will be provided to allow an in-game communication between team members;
+					\item \textbf{localization:} keeps track of players last known position and last time he was active;
+					\item \textbf{roles:} the role and action selection system will be entirely done by the app between the players, the server will only observe those operations;
+					\item \textbf{board visibility:} which part of the board, which other players and which markers to show to each player will be decided by the app, depending on the role and location of current player.
+				\end{itemize}
+			
+	\section{Work flow}
+		
+		The game has a multiphase structure, one of which is turn based (the more important, the actual "gaming" part).
+	
+		\subsection{Initialize}
+		
+			In this phase we set-up the game performing various ordered steps:
+			
+			\begin{enumerate}
+				\item The board centre and radius are fetched from the database;
+				\item Clean all data from previous game, in particular the random event probability and the turn counter are set to 0;
+				\item Instantiate random events and reset set them as eligible to be drawn;
+				\item Instantiate zones;
+				\item Generate the board;
+				\item Load zones info (centre coordinates, perimeter points, cost, description, etc.) and status (initially calm) into the database;
+				\item Randomly chose the starting zones, setting them as chaotic;
+				\item Retrieve teams and units from the database;
+				\item For every team: 
+				\begin{enumerate}					
+					\item For every member of the team:
+					\begin{enumerate}
+						\item Select the starting zone with fewer units already assigned to it;
+						\item Assign the unit to that starting zone;
+						\item Set unit starting position to the centre of that zone, reset his last position and last beat values, set him as not ready to start the game;
+						\item Increase the counter that keeps track of the users that play this game;
+					\end{enumerate}
+					\item Randomly chose an available objective and assign it to the team;
+					\item Set the initial team's money reserve;
+				\end{enumerate}
+			\end{enumerate}
+		
+		\subsection{Prepare}
+		
+			During this phase, the units must reach their starting point: once everyone is within 10 meters from it, all listeners on the database are initialized and then the game is started.
+		
+		\subsection{Start}
+			
+			This is the core phase of the game: it's a loop which every turn execute three logical sub-phases.
+				
+			\subsubsection{Control}
+			
+				Here the turn preparation is done: this part does not interact with the users in any way, considering that are mostly checks and various game status automatic changes.
+			
+				The first check performed is on the victory criteria: all teams' objective is checked against the current game status. If one of them is fulfilled, the games ends.
+				
+				Then, as first operation of the new turn, the turn counter is increased, its value is updated on the database and all temporary conditions are reset to their defaults.
+				
+				The second check is on the random event: if there is at least one available event to fire out, a randomly generated percentage number is tested against the current event probability and, if it's lesser or equal, the event is fired and the event probability is reset to a minimum value.
+				In case the probability is set to 0.00 (possible only if it's the first turn), it is instead set to a minimum value and the test is skipped.
+				
+				Lastly, the bonus gained by the controlled zones is applied.
+				
+			\subsubsection{Roles}
+			
+				Here the roles selection system is activated and players will choose their role and action for that turn following the rules explained in \autoref{nolead:role}.
+				The server will only set the timer (four minutes) and manage possible role conflicts at the end of it.
+				After giving the role, another timer (one minute) is set to let them decide the action.
+			
+			\subsubsection{Turn}
+			
+				Here the real game take place: the server will keep a timer of fifteen minutes during which the players can act following their team objectives or disrupting others plans.
+				Every action will be performed directly on the app communicating to the database without server interaction, but this does not mean that it will stay idle: every action made on the database, as well as every player movement, will be recorded by the server on a log file from which will then be possible to re-run the match replay in order to get statistics and to study it.
+			
+		\subsection{End}
+		
+			All players are notified that the game is ended and who's the winner, then a gathering point is given to all players that must reach it in order to meet-up with organizers and continue the event: likely the winner team will be awarded at this point with the possible prize.
+			
+	\section{Class abstractions}
+	
+		CODE CLASS DESCRIPTION

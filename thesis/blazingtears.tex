@@ -1,0 +1,101 @@
+% The TOPtesi class loads the following packets,
+% that's why they are commented below with a single %:
+% - graphicx
+% - babel
+% Other packages are explicitly forbidden by TOPtesi manual,
+% that's why they are commented below with a double %
+\documentclass[
+	%cucitura,				% To decomment when the printable version is needed
+	draft,					% Comment after final revision, also hides images
+	twoside]				% Print on both side of the page
+	{toptesi}				% We'll be using the toptesi class
+
+%%% PACKAGES USAGE
+
+\usepackage[a-1b]{pdfx}		% Pdf format: PDF/A, mandatory for Polito thesis storage
+\usepackage[T1]{fontenc}	% Manages accented chars in output
+\usepackage[utf8]{inputenc}	% Input encoding, accept accented chars from keyboard
+\usepackage{amsmath,amssymb}% Math chars
+% \usepackage{graphicx}		% To include external images, loaded by toptesi class
+% \usepackage[english]{babel} % Main language of the document
+\usepackage{lipsum}			% Random text generator
+\usepackage{microtype}		% Allow some small characters to overflow the margin
+\usepackage{quoting}		% Better quoting system than the default
+%% \usepackage{caption}		% Extends figure and table caption functions
+\usepackage[autostyle]
+	{csquotes}				% Autostyles the quotes of bibliography
+\usepackage[backend=biber,style=numeric-comp,hyperref]
+	{biblatex}				% Automatic bibliography using biber
+\usepackage{makeidx}		% Analitic index
+\usepackage{xcolor}			% Enhanced and standardized colors management
+\usepackage{listings}		% Coding fragments
+\usepackage{booktabs}		% Tables lines
+
+%%% PACKAGES SETUP
+
+%% \captionsetup{
+%%	tableposition=top,		% Table caption is put in top position
+%%	figureposition=bottom,	% Figure caption is put in bottom position
+%%	font=small,				% Uses small font size for captions
+%%	labelfont={sf,bf}		% Caption label is black and sans serif
+%% }
+\quotingsetup{font=small}	% Set small font size for quoting
+\hypersetup{
+	pdfpagemode={UseOutlines},
+	bookmarksopen,
+	pdfstartview={FitH},
+	colorlinks,
+	linkcolor={blue},
+	citecolor={blue},
+	urlcolor={blue}
+}
+\addbibresource
+	{back/thesis.bib}		% Specify where to find bibliography file
+\makeindex					% ??
+\lstset{
+	basicstyle=\small\ttfamily,	% Display code in small font size and normal spacing
+	language=Java,			% Displayed code will  be Java
+	numbers=left,			% Line numbers are placed to the left
+	numberstyle=\tiny,		% Line numbers have tiny font size
+	stepnumber=5,			% Put a line number ever 5 lines
+	tabsize=4,				% Tabs takes are 4 spaces wide
+	columns=fullflexible,	% To keep chars natural width (no distorsion)
+	keepspaces=true
+}
+
+%%% DOCUMENT
+
+\begin{document}
+	\english
+	
+	\input{front/frontispiece}
+
+	\input{front/abstract}
+	
+	\input{front/index}
+	
+	\input{front/thanks}
+	
+	\mainmatter
+	
+	\input{main/introduction}
+	
+	\input{main/stateofart}
+	
+	\input{main/idea}
+	
+	\input{main/design}
+	
+	\input{main/implementation}
+	
+	\input{main/augmented}
+	
+	\input{main/results}
+	
+	\input{main/conclusion}
+	
+	\input{back/bibliography}
+	
+	\input{back/index}
+	
+\end{document}
