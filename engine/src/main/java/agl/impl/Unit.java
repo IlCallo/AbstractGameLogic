@@ -5,8 +5,6 @@ import agl.core.aglRole;
 
 public class Unit extends aglActor {
     private Team mTeam;
-    private boolean mImmune = false;
-    private boolean mMultitasking = false;
 
     public Unit(String id) {
         super(id);
@@ -32,21 +30,5 @@ public class Unit extends aglActor {
 
     public void setTeam(Team team) {
         mTeam = team;
-    }
-
-    public boolean isImmune() {
-        return mImmune;
-    }
-
-    public void setImmune(boolean immune) {
-        mImmune = immune;
-    }
-
-    public boolean isMultitasking() {
-        return mMultitasking;
-    }
-
-    public void setMultitasking(boolean multitasking) {
-        mMultitasking = multitasking;
     }
 }

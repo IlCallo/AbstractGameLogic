@@ -1,6 +1,6 @@
 package agl.impl.zone;
 
-import agl.impl.VariableParam;
+import agl.impl.role.RoleProvider;
 
 public class MultitaskingZone extends BaseZone {
 
@@ -9,7 +9,7 @@ public class MultitaskingZone extends BaseZone {
     }
 
     @Override
-    public void usePower(VariableParam param) {
-        param.getUnit().setMultitasking(true);
+    protected void powerUp() {
+        getController().getRolePool().put(RoleProvider.MULTITASKING_ROLE, 1);
     }
 }

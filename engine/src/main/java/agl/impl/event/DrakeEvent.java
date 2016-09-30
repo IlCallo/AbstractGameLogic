@@ -10,6 +10,7 @@ public class DrakeEvent extends BaseEvent {
 
     @Override
     public void runEvent(TurnGame game) {
+        // Extract a zone and clears it
         RandomPicker.pick(game.getBoard().getZones()).clear();
     }
 }

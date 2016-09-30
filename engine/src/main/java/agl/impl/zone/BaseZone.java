@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BaseZone implements PowerUp {
+public abstract class BaseZone extends PowerUp {
     private int mId;
     private int mCost;
     private String mDescription;
     private boolean mChaotic;
+    private int mDemons;
     private ArrayList<Building> mBuildings;
     private ArrayList<Unit> mUnits;
 
@@ -29,6 +30,7 @@ public abstract class BaseZone implements PowerUp {
         mCost = cost;
         mDescription = description;
         mChaotic = false;
+        mDemons = 0;
         mControlMap = new HashMap<>();
         mNearZones = new ArrayList<>();
 
@@ -44,8 +46,22 @@ public abstract class BaseZone implements PowerUp {
         return mChaotic;
     }
 
-    void setChaotic(boolean chaotic) {
+    public void setChaotic(boolean chaotic) {
         mChaotic = chaotic;
+    }
+
+    public int getDemons() {
+        return mDemons;
+    }
+
+    public void addDemon() {
+        mDemons++;
+    }
+
+    public void removeDemon() {
+        if (mDemons > 0) {
+            mDemons--;
+        }
     }
 
     public int getCost() {

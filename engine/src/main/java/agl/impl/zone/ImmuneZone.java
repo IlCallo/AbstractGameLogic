@@ -1,6 +1,6 @@
 package agl.impl.zone;
 
-import agl.impl.VariableParam;
+import agl.impl.role.RoleProvider;
 
 public class ImmuneZone extends BaseZone {
 
@@ -9,7 +9,7 @@ public class ImmuneZone extends BaseZone {
     }
 
     @Override
-    public void usePower(VariableParam param) {
-        param.getUnit().setImmune(true);
+    protected void powerUp() {
+        getController().getRolePool().put(RoleProvider.UNTOUCHABLE_ROLE, 1);
     }
 }

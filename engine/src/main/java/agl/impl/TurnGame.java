@@ -2,6 +2,7 @@ package agl.impl;
 
 import agl.impl.event.*;
 import agl.impl.objective.*;
+import agl.impl.role.RoleProvider;
 import agl.impl.utils.RandomPicker;
 import agl.impl.zone.*;
 import agl.utils.BoardFactory;
@@ -34,16 +35,16 @@ public class TurnGame implements Runnable {
     private static final int ACTION_TIMEOUT = 2;
     private static final int TURN_TIMEOUT = 15;
 
-    private static final String OBJECTIVE_CHAOS = "chaos";
-    private static final int OBJECTIVE_CHAOS_NUM = 8;
-    private static final String OBJECTIVE_CONTROL = "control";
-    private static final int OBJECTIVE_CONTROL_NUM = 4;
-    private static final String OBJECTIVE_CUTRO = "cutro";
-    private static final int OBJECTIVE_CUTRO_NUM = 50;
-    private static final String OBJECTIVE_OMNIPRESENT = "omnipresent";
-    private static final int OBJECTIVE_OMNIPRESENT_NUM = 9;
-    private static final String OBJECTIVE_PEACEFUL = "peaceful";
-    private static final int OBJECTIVE_PEACEFUL_NUM = 9;
+    private static final String CHAOS_OBJECTIVE = "chaos";
+    private static final int CHAOS_OBJECTIVE_NUM = 8;
+    private static final String CONTROL_OBJECTIVE = "control";
+    private static final int CONTROL_OBJECTIVE_NUM = 4;
+    private static final String RICH_OBJECTIVE = "rich";
+    private static final int RICH_OBJECTIVE_NUM = 50;
+    private static final String OMNIPRESENT_OBJECTIVE = "omnipresent";
+    private static final int OMNIPRESENT_OBJECTIVE_NUM = 8;
+    private static final String PEACEFUL_OBJECTIVE = "peaceful";
+    private static final int PEACEFUL_OBJECTIVE_NUM = 8;
 
     private static final String INITIALIZE_PHASE = "initialize";
     private static final String PREPARE_PHASE = "prepare";
@@ -198,7 +199,7 @@ public class TurnGame implements Runnable {
                 LOG.fine("Center and radius has been retrieved from Firebase");
 
                 mTurn = 0;
-                mEventProbability = 0.25;
+                mEventProbability = 0.00;
 
                 // Initialize general game info
                 mRef.child("game/turn").setValue(mTurn);
@@ -275,6 +276,8 @@ public class TurnGame implements Runnable {
                                 i--;
                             } else {
                                 possibleStartingZones.add(zone);
+                                zone.setChaotic(true);
+                                mRef.child("zone/" + zone.getId() + "/chaotic").setValue(true);
                             }
 
                             LOG.log(Level.FINE, "Starting location n. {0} will be zone {1} which is a {2}",
@@ -289,8 +292,8 @@ public class TurnGame implements Runnable {
                                 long unitsToWait = 0;
 
                                 // Define objective placeholder
-                                ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(OBJECTIVE_CHAOS, OBJECTIVE_CONTROL,
-                                        OBJECTIVE_CUTRO, OBJECTIVE_OMNIPRESENT, OBJECTIVE_PEACEFUL));
+                                ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(CHAOS_OBJECTIVE, CONTROL_OBJECTIVE,
+                                        RICH_OBJECTIVE, OMNIPRESENT_OBJECTIVE, PEACEFUL_OBJECTIVE));
 
                                 // Cycle all registered teams
                                 for (DataSnapshot ds1 : dataSnapshot.getChildren()) {
@@ -327,20 +330,20 @@ public class TurnGame implements Runnable {
                                     Objective objective = null;
 
                                     switch (o) {
-                                        case OBJECTIVE_CHAOS:
-                                            objective = new ChaosObjective("", OBJECTIVE_CHAOS_NUM);
+                                        case CHAOS_OBJECTIVE:
+                                            objective = new ChaosObjective("", CHAOS_OBJECTIVE_NUM);
                                             break;
-                                        case OBJECTIVE_CONTROL:
-                                            objective = new ControlObjective("", OBJECTIVE_CONTROL_NUM, team);
+                                        case CONTROL_OBJECTIVE:
+                                            objective = new ControlObjective("", CONTROL_OBJECTIVE_NUM, team);
                                             break;
-                                        case OBJECTIVE_CUTRO:
-                                            objective = new CutroObjective("", OBJECTIVE_CUTRO_NUM, team);
+                                        case RICH_OBJECTIVE:
+                                            objective = new RichObjective("", RICH_OBJECTIVE_NUM, team);
                                             break;
-                                        case OBJECTIVE_OMNIPRESENT:
-                                            objective = new OmnipresentObjective("", OBJECTIVE_OMNIPRESENT_NUM, team);
+                                        case OMNIPRESENT_OBJECTIVE:
+                                            objective = new OmnipresentObjective("", OMNIPRESENT_OBJECTIVE_NUM, team);
                                             break;
-                                        case OBJECTIVE_PEACEFUL:
-                                            objective = new PeacefulObjective("", OBJECTIVE_PEACEFUL_NUM);
+                                        case PEACEFUL_OBJECTIVE:
+                                            objective = new PeacefulObjective("", PEACEFUL_OBJECTIVE_NUM);
                                             break;
                                     }
 
@@ -414,7 +417,7 @@ public class TurnGame implements Runnable {
 
             checkEvent();
 
-            zonePowerUp();
+            activePowerUp();
 
             chooseRole();
 
@@ -453,30 +456,47 @@ public class TurnGame implements Runnable {
         // Remove fog of war
         mFog = false;
 
-        // TODO: remove unit invulnerability and multitasking
+        // Remove roles from units (also removes invulnerability and multitasking)
+        for (Unit u : getUnits()) {
+            u.setRole(null);
+        }
+
+        // Reset teams' role pool (remove role pool enhancements)
+        for (Team t : getTeams()) {
+            t.setRolePool(RoleProvider.getInitialRolePool());
+        }
 
     }
 
     private void checkEvent() {
         // Check if there are still events to fire out
         if (mEvents.size() > 0) {
-            // Check if an event take place
-            if (ThreadLocalRandom.current().nextDouble() <= mEventProbability) {
-                // Reset event possibility to the minimum
+            // If the event probability is at 0.00, it's first turn, we set it to a minimum value and finish here
+            // No event can be fired in the first turn
+            if (mEventProbability == 0.00) {
                 mEventProbability = 0.25;
-                // Extract an event, execute it and remove it from the list
-                int index = ThreadLocalRandom.current().nextInt(mEvents.size());
-                mEvents.get(index).runEvent(this);
-                mEvents.remove(index);
             } else {
-                // Double the possibility for an event to take place
-                mEventProbability *= 2;
+                // Check if an event take place
+                if (ThreadLocalRandom.current().nextDouble() <= mEventProbability) {
+                    // Reset event possibility to the minimum
+                    mEventProbability = 0.25;
+                    // Extract an event, execute it and remove it from the list
+                    int index = ThreadLocalRandom.current().nextInt(mEvents.size());
+                    mEvents.get(index).runEvent(this);
+                    mEvents.remove(index);
+                } else {
+                    // Double the possibility for an event to take place
+                    mEventProbability *= 2;
+                }
             }
         }
     }
 
-    private void zonePowerUp() {
-        // Start powerup timer
+    private void activePowerUp() {
+        // Execute power-up for whom have right to use them
+        mBoard.getZones().stream().filter(z -> z.getController() != null).forEach(z -> {
+            z.usePowerUp();
+        });
     }
 
     private void chooseRole() {

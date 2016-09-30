@@ -5,11 +5,11 @@ import agl.impl.Team;
 import agl.impl.TurnGame;
 import agl.impl.zone.BaseZone;
 
-public class CutroObjective extends BaseObjective {
+public class RichObjective extends BaseObjective {
     private int mVictoryMoney;
     private Team mTeam;
 
-    public CutroObjective(String description, int victoryMoney, Team team) {
+    public RichObjective(String description, int victoryMoney, Team team) {
         super(description);
         mVictoryMoney = victoryMoney;
         mTeam = team;

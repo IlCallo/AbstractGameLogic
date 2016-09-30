@@ -9,7 +9,7 @@ public abstract class aglAction {
         mDescription = description;
     }
 
-    public abstract void execute();
+    public abstract void doAction();
 
     @Override
     public String toString() {

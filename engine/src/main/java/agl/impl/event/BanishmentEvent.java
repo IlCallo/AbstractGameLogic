@@ -1,6 +1,7 @@
 package agl.impl.event;
 
 import agl.impl.TurnGame;
+import agl.impl.utils.RandomPicker;
 
 public class BanishmentEvent extends BaseEvent {
     public BanishmentEvent() {
@@ -9,6 +10,7 @@ public class BanishmentEvent extends BaseEvent {
 
     @Override
     public void runEvent(TurnGame game) {
-
+        // Extract a zone and disable its power-up
+        RandomPicker.pick(game.getBoard().getZones()).setPowerUpEnabled(false);
     }
 }

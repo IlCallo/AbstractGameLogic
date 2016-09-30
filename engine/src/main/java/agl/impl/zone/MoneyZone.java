@@ -1,7 +1,5 @@
 package agl.impl.zone;
 
-import agl.impl.VariableParam;
-
 public class MoneyZone extends BaseZone {
     private int mMoney;
 
@@ -15,7 +13,7 @@ public class MoneyZone extends BaseZone {
     }
 
     @Override
-    public void usePower(VariableParam param) {
+    protected void powerUp() {
         getController().earnMoney(mMoney);
     }
 }

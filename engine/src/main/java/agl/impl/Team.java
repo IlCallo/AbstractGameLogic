@@ -2,14 +2,21 @@ package agl.impl;
 
 import agl.core.aglGroup;
 import agl.impl.objective.Objective;
+import agl.impl.role.RoleProvider;
+
+import java.util.Map;
 
 public class Team extends aglGroup {
     private Objective mObjective;
     private int mMoney;
+    private Map<String, Integer> mRolePool;
 
     public Team(String id, String name) {
         super(id, name);
         mMoney = 0;
+
+        // Initialize the standard role pool
+        mRolePool = RoleProvider.getInitialRolePool();
     }
 
     public Objective getObjective() {
@@ -34,5 +41,13 @@ public class Team extends aglGroup {
         }
         mMoney -= loss;
         return true;
+    }
+
+    public Map<String, Integer> getRolePool() {
+        return mRolePool;
+    }
+
+    public void setRolePool(Map<String, Integer> rolePool) {
+        mRolePool = rolePool;
     }
 }

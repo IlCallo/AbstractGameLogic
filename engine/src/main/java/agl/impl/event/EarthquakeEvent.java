@@ -15,9 +15,11 @@ public class EarthquakeEvent extends BaseEvent {
     public void runEvent(TurnGame game) {
         List<BaseZone> zones = game.getBoard().getZones();
 
+        // Extract a zone
         BaseZone z1 = RandomPicker.pick(zones);
         z1.getBuildings().forEach(z1::removeBuilding);
 
+        // Extract another zone different from the first one
         BaseZone z2;
         do {
             z2 = RandomPicker.pick(zones);
