@@ -1,6 +1,7 @@
 package blazing.tears.group;
 
 import blazing.tears.objective.Objective;
+import blazing.tears.role.Role;
 import blazing.tears.role.RoleProvider;
 
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
 public class Team extends BaseGroup {
     private Objective mObjective;
     private int mMoney;
-    private Map<String, Integer> mRolePool;
+    private Map<Role, Integer> mRolePool;
 
     public Team(String id, String name) {
         super(id, name);
@@ -42,11 +43,11 @@ public class Team extends BaseGroup {
         return true;
     }
 
-    public Map<String, Integer> getRolePool() {
+    public Map<Role, Integer> getRolePool() {
         return mRolePool;
     }
 
-    public void setRolePool(Map<String, Integer> rolePool) {
+    public void setRolePool(Map<Role, Integer> rolePool) {
         mRolePool = rolePool;
     }
 }

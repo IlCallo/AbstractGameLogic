@@ -1,6 +1,7 @@
 package blazing.tears;
 
 import blazing.tears.actor.Unit;
+import blazing.tears.constant.GamePhase;
 import blazing.tears.constant.GameStatus;
 import blazing.tears.event.*;
 import blazing.tears.group.Team;
@@ -19,9 +20,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static blazing.tears.constant.GamePhase.*;
+import static blazing.tears.constant.GameStatus.*;
 
 
 public class TurnGame implements Runnable {
@@ -33,10 +39,10 @@ public class TurnGame implements Runnable {
 
     private static final int STARTING_ZONE_NUM = 3;
 
-    private static final int POWERUP_TIMEOUT = 1;
-    private static final int ROLE_TIMEOUT = 2;
-    private static final int ACTION_TIMEOUT = 2;
-    private static final int TURN_TIMEOUT = 15;
+    private static final long ROLE_TIMEOUT = 2 * 1000 * 60;
+    private static final long ACTION_TIMEOUT = 2 * 1000 * 60;
+    private static final long MONEY_TIMEOUT = 1 * 1000 * 60;
+    private static final long TURN_TIMEOUT = 15 * 1000 * 60;
 
     private static final String CHAOS_OBJECTIVE = "chaos";
     private static final int CHAOS_OBJECTIVE_NUM = 8;
@@ -141,31 +147,31 @@ public class TurnGame implements Runnable {
         mRef.child("game/status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String phase = (String) dataSnapshot.getValue();
-                if (phase == null) {
-                    mRef.child("game/status").setValue(GameStatus.INITIALIZE);
+                GameStatus status = GameStatus.valueOf(dataSnapshot.getValue(String.class));
+                if (status == INACTIVE) {
+                    mRef.child("game/status").setValue(INITIALIZE);
                     return;
                 }
 
-                LOG.log(Level.FINE, "Current phase is {0}", phase);
+                LOG.log(Level.FINE, "Current status is {0}", status);
 
-                switch (phase) {
-                    case GameStatus.INITIALIZE:
+                switch (status) {
+                    case INITIALIZE:
                         initialize();
                         break;
-                    case GameStatus.PREPARE:
+                    case PREPARE:
                         prepare();
                         break;
-                    case GameStatus.START:
-                        start();
+                    case START:
+                        start(CONTROL);
                         break;
-                    case GameStatus.PAUSE:
+                    case PAUSE:
                         pause();
                         break;
-                    case GameStatus.RESUME:
+                    case RESUME:
                         resume();
                         break;
-                    case GameStatus.END:
+                    case END:
                         end();
                         break;
                 }
@@ -404,25 +410,84 @@ public class TurnGame implements Runnable {
         });
     }
 
-    private void start() {
-        while (!meetsEndingCriteria()) {
-            mTurn++;
-            mRef.child("game/turn").setValue(mTurn);
+    private void start(GamePhase phase) {
+        if (phase == CONTROL) {
+            if (meetsEndingCriteria()) {
+                mRef.child("game/status").setValue(END);
+            } else {
+                mTurn++;
+                mRef.child("game/turn").setValue(mTurn);
 
-            resetCondition();
+                resetCondition();
 
-            checkEvent();
+                checkEvent();
 
-            activePowerUp();
+                activePowerUp();
 
-            chooseRole();
+                // Go to the next phase
+                start(ROLE);
+            }
+        } else {
+            // get current expiration time
+            long expireTime = System.currentTimeMillis();
+            TimerTask tt = null;
 
-            chooseAction();
+            switch (phase) {
+                case ROLE:
+                    expireTime += ROLE_TIMEOUT;
+                    tt = new TimerTask() {
+                        @Override
+                        public void run() {
+                            // Checks role conflicts and resolve them
+                            // Go to the next phase
+                            start(ACTION);
+                        }
+                    };
+                    break;
+                case ACTION:
+                    expireTime += ACTION_TIMEOUT;
+                    tt = new TimerTask() {
+                        @Override
+                        public void run() {
+                            // Checks actions conflicts and resolve them
+                            // Go to the next phase
+                            start(MONEY);
+                        }
+                    };
+                    break;
+                case MONEY:
+                    expireTime += MONEY_TIMEOUT;
+                    tt = new TimerTask() {
+                        @Override
+                        public void run() {
+                            // Checks money conflicts and resolve them
+                            // Go to the next phase
+                            start(TURN);
+                        }
+                    };
+                    break;
+                case TURN:
+                    expireTime += TURN_TIMEOUT;
+                    tt = new TimerTask() {
+                        @Override
+                        public void run() {
+                            // Checks turn conflicts and resolve them
+                            // Go to the next phase
+                            start(CONTROL);
+                        }
+                    };
+                    break;
+            }
 
-            turn();
+            assert tt != null;
+            new Timer().schedule(tt, expireTime);
+
+            // Set timer value on Firebase
+            mRef.child("game/timer").setValue(expireTime);
         }
 
-        mRef.child("game/status").setValue(GameStatus.END);
+        // Updates phase
+        mRef.child("game/phase").setValue(phase);
     }
 
     private void pause() {
@@ -501,6 +566,10 @@ public class TurnGame implements Runnable {
 
     private void chooseAction() {
         // Start main.action timer
+    }
+
+    private void askLoan() {
+        // Start main.money timer
     }
 
     private void turn() {

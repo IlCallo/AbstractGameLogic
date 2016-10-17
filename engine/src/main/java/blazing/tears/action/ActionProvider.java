@@ -1,7 +1,7 @@
 package blazing.tears.action;
 
-import com.google.common.collect.ImmutableMap;
-
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 // TODO: is it possible to do this by setting all main.role classes with static content?
@@ -15,15 +15,19 @@ public class ActionProvider {
     static public final String PANIC_ACTION = "panic";
     static public final String COLLECT_ACTION = "collect";
 
-    static private final Map<String, BaseAction> sActions = ImmutableMap.<String, BaseAction>builder()
-            .put(PROTECT_ACTION, new ProtectAction())
-            .put(CALM_ACTION, new CalmAction())
-            .put(DEMOLISH_ACTION, new DemolishAction())
-            .put(ASSASSINATE_ACTION, new AssassinateAction())
-            .put(BUILD_ACTION, new BuildAction())
-            .put(PANIC_ACTION, new PanicAction())
-            .put(COLLECT_ACTION, new CollectAction())
-            .build();
+    static private final Map<String, BaseAction> sActions;
+
+    static {
+        Map<String, BaseAction> aMap = new HashMap<>();
+        aMap.put(PROTECT_ACTION, new ProtectAction());
+        aMap.put(CALM_ACTION, new CalmAction());
+        aMap.put(DEMOLISH_ACTION, new DemolishAction());
+        aMap.put(ASSASSINATE_ACTION, new AssassinateAction());
+        aMap.put(BUILD_ACTION, new BuildAction());
+        aMap.put(PANIC_ACTION, new PanicAction());
+        aMap.put(COLLECT_ACTION, new CollectAction());
+        sActions = Collections.unmodifiableMap(aMap);
+    }
 
     static public BaseAction getAction(String name) {
         return sActions.get(name);
