@@ -33,7 +33,7 @@ public class RoleProvider {
         rolePool.put(COP, 2);
         rolePool.put(ASSASSIN, 2);
         rolePool.put(BUILDER, 2);
-        rolePool.put(COLLECTOR, 1000);
+        rolePool.put(COLLECTOR, 999);
         rolePool.put(UNTOUCHABLE, 0);
         rolePool.put(MULTITASKING, 0);
         return rolePool;

@@ -8,11 +8,13 @@ import java.util.Map;
 
 public class Team extends BaseGroup {
     private Objective mObjective;
+    private String mColor;
     private int mMoney;
     private Map<Role, Integer> mRolePool;
 
     public Team(String id, String name) {
         super(id, name);
+        mColor = "transparent";
         mMoney = 0;
 
         // Initialize the standard main.role pool
@@ -25,6 +27,14 @@ public class Team extends BaseGroup {
 
     public void setObjective(Objective objective) {
         mObjective = objective;
+    }
+
+    public String getColor() {
+        return mColor;
+    }
+
+    public void setColor(String color) {
+        mColor = color;
     }
 
     public int getMoney() {

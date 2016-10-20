@@ -205,7 +205,7 @@ public class TurnGame implements Runnable {
 
                 // Initialize general game info
                 mRef.child("game/turn").setValue(mTurn);
-                mRef.child("game/main.event/probability").setValue(mEventProbability);
+                mRef.child("game/event/probability").setValue(mEventProbability);
 
                 // Load events
                 mEvents.add(new BanishmentEvent());
@@ -218,11 +218,11 @@ public class TurnGame implements Runnable {
                 mEvents.add(new TaxEvent());
 
                 // Clean previous data
-                mRef.child("game/main.event/possible").setValue(null);
+                mRef.child("game/event/possible").setValue(null);
 
                 // Load events reference
                 for (BaseEvent event : mEvents) {
-                    mRef.child("game/main.event/possible").push().setValue(event.getName());
+                    mRef.child("game/event/possible").push().setValue(event.getName());
                 }
 
                 // Initialize zones and board
@@ -240,7 +240,7 @@ public class TurnGame implements Runnable {
                 mBoard = BoardFactory.createBoard(center, radius, zones);
 
                 // load zones into db
-                mRef.child("main/zone").runTransaction(new Transaction.Handler() {
+                mRef.child("zone").runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         for (BaseZone z : zones) {
@@ -279,10 +279,10 @@ public class TurnGame implements Runnable {
                             } else {
                                 possibleStartingZones.add(zone);
                                 zone.setChaotic(true);
-                                mRef.child("main/zone/" + zone.getId() + "/chaotic").setValue(true);
+                                mRef.child("zone/" + zone.getId() + "/chaotic").setValue(true);
                             }
 
-                            LOG.log(Level.FINE, "Starting location n. {0} will be main.zone {1} which is a {2}",
+                            LOG.log(Level.FINE, "Starting location n. {0} will be zone {1} which is a {2}",
                                     new Object[]{i, zone.getId(), zone.getClass().toString()});
                         }
 
@@ -293,7 +293,11 @@ public class TurnGame implements Runnable {
                                 // Number of units to wait
                                 long unitsToWait = 0;
 
-                                // Define main.objective placeholder
+                                // Define color names
+                                ArrayList<String> colorList = new ArrayList<>(Arrays.asList("red", "white",
+                                        "yellow", "green", "purple"));
+
+                                // Define objective placeholder
                                 ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(CHAOS_OBJECTIVE, CONTROL_OBJECTIVE,
                                         RICH_OBJECTIVE, OMNIPRESENT_OBJECTIVE, PEACEFUL_OBJECTIVE));
 
@@ -327,7 +331,7 @@ public class TurnGame implements Runnable {
                                         team.addMember(unit);
                                     }
 
-                                    // Choose a random main.objective
+                                    // Choose a random objective
                                     String o = RandomPicker.pick(objectiveList);
                                     Objective objective = null;
 
@@ -351,9 +355,15 @@ public class TurnGame implements Runnable {
 
                                     objectiveList.remove(o);
 
-                                    // Set the main.objective
+                                    // Set the objective
                                     team.setObjective(objective);
-                                    mRef.child("team/" + team.getId() + "/main/objective").setValue(o);
+                                    mRef.child("team/" + team.getId() + "/objective").setValue(o);
+
+                                    // Set color
+                                    String c = RandomPicker.pick(colorList);
+                                    colorList.remove(c);
+                                    team.setColor(c);
+                                    mRef.child("team/" + team.getId() + "/color").setValue(c);
 
                                     // Set initial money
                                     team.earnMoney(INITIAL_MONEY);
@@ -362,7 +372,7 @@ public class TurnGame implements Runnable {
                                     // Add the team to the team lists
                                     mTeams.add(team);
 
-                                    LOG.log(Level.FINE, "Team {0} initialized with main.objective => {1}",
+                                    LOG.log(Level.FINE, "Team {0} initialized with objective => {1}",
                                             new Object[]{team.getName(), team.getObjective().getClass().toString()});
                                 }
 
@@ -411,6 +421,7 @@ public class TurnGame implements Runnable {
     }
 
     private void start(GamePhase phase) {
+        // Special checks if it's control phase
         if (phase == CONTROL) {
             if (meetsEndingCriteria()) {
                 mRef.child("game/status").setValue(END);
@@ -432,6 +443,7 @@ public class TurnGame implements Runnable {
             long expireTime = System.currentTimeMillis();
             TimerTask tt = null;
 
+            // Set ad-hoc expiration time and timer task for every phase
             switch (phase) {
                 case ROLE:
                     expireTime += ROLE_TIMEOUT;
@@ -439,6 +451,7 @@ public class TurnGame implements Runnable {
                         @Override
                         public void run() {
                             // Checks role conflicts and resolve them
+                            chooseRole();
                             // Go to the next phase
                             start(ACTION);
                         }
@@ -450,6 +463,7 @@ public class TurnGame implements Runnable {
                         @Override
                         public void run() {
                             // Checks actions conflicts and resolve them
+                            chooseAction();
                             // Go to the next phase
                             start(MONEY);
                         }
@@ -461,6 +475,7 @@ public class TurnGame implements Runnable {
                         @Override
                         public void run() {
                             // Checks money conflicts and resolve them
+                            askLoan();
                             // Go to the next phase
                             start(TURN);
                         }
@@ -472,6 +487,7 @@ public class TurnGame implements Runnable {
                         @Override
                         public void run() {
                             // Checks turn conflicts and resolve them
+                            turn();
                             // Go to the next phase
                             start(CONTROL);
                         }
@@ -480,6 +496,7 @@ public class TurnGame implements Runnable {
             }
 
             assert tt != null;
+            // Start timer
             new Timer().schedule(tt, expireTime);
 
             // Set timer value on Firebase
@@ -503,6 +520,7 @@ public class TurnGame implements Runnable {
     }
 
     private boolean meetsEndingCriteria() {
+        // Checks objectives of every team
         for (Team team : mTeams) {
             if (team.getObjective().checkVictory(this)) {
                 return true;
@@ -522,7 +540,7 @@ public class TurnGame implements Runnable {
             u.setRole(null);
         }
 
-        // Reset teams' main.role pool (remove main.role pool enhancements)
+        // Reset teams' role pool (remove role pool enhancements)
         for (Team t : getTeams()) {
             t.setRolePool(RoleProvider.getInitialRolePool());
         }
@@ -532,21 +550,21 @@ public class TurnGame implements Runnable {
     private void checkEvent() {
         // Check if there are still events to fire out
         if (mEvents.size() > 0) {
-            // If the main.event probability is at 0.00, it's first turn, we set it to a minimum value and finish here
-            // No main.event can be fired in the first turn
+            // If the event probability is at 0.00, it's first turn, we set it to a minimum value and finish here
+            // No event can be fired in the first turn
             if (mEventProbability == 0.00) {
                 mEventProbability = 0.25;
             } else {
-                // Check if an main.event take place
+                // Check if an event take place
                 if (ThreadLocalRandom.current().nextDouble() <= mEventProbability) {
-                    // Reset main.event possibility to the minimum
+                    // Reset event possibility to the minimum
                     mEventProbability = 0.25;
-                    // Extract an main.event, execute it and remove it from the list
+                    // Extract an event, execute it and remove it from the list
                     int index = ThreadLocalRandom.current().nextInt(mEvents.size());
                     mEvents.get(index).runEvent(this);
                     mEvents.remove(index);
                 } else {
-                    // Double the possibility for an main.event to take place
+                    // Double the possibility for an event to take place
                     mEventProbability *= 2;
                 }
             }
@@ -561,18 +579,15 @@ public class TurnGame implements Runnable {
     }
 
     private void chooseRole() {
-        // Start main.role timer
+
     }
 
     private void chooseAction() {
-        // Start main.action timer
     }
 
     private void askLoan() {
-        // Start main.money timer
     }
 
     private void turn() {
-        // Start turn timer
     }
 }
