@@ -8,9 +8,9 @@ import blazing.tears.group.Team;
 import blazing.tears.objective.*;
 import blazing.tears.role.RoleProvider;
 import blazing.tears.utils.BoardFactory;
+import blazing.tears.utils.DatabaseInitializer;
 import blazing.tears.utils.RandomPicker;
 import blazing.tears.zone.*;
-import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -67,13 +67,11 @@ public class TurnGame implements Runnable {
     private boolean mFog;
 
     private DatabaseReference mRef;
-    private GeoFire mGeo;
 
     private boolean mTerminate;
 
-    public TurnGame(DatabaseReference ref, GeoFire geo) {
+    public TurnGame(DatabaseReference ref) {
         mRef = ref;
-        mGeo = geo;
         mBoard = null;
         mTeams = new ArrayList<>();
         mUnits = new ArrayList<>();
@@ -104,8 +102,11 @@ public class TurnGame implements Runnable {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
+        // Clean/reset the database with dummy data
+        DatabaseInitializer.setup(ref);
+
         // start new game on his own thread
-        (new Thread(new TurnGame(ref, new GeoFire(ref.child("geofire"))))).start();
+        (new Thread(new TurnGame(ref))).start();
     }
 
     public int getTurn() {
@@ -293,10 +294,6 @@ public class TurnGame implements Runnable {
                                 // Number of units to wait
                                 long unitsToWait = 0;
 
-                                // Define color names
-                                ArrayList<String> colorList = new ArrayList<>(Arrays.asList("red", "white",
-                                        "yellow", "green", "purple"));
-
                                 // Define objective placeholder
                                 ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(CHAOS_OBJECTIVE, CONTROL_OBJECTIVE,
                                         RICH_OBJECTIVE, OMNIPRESENT_OBJECTIVE, PEACEFUL_OBJECTIVE));
@@ -304,7 +301,9 @@ public class TurnGame implements Runnable {
                                 // Cycle all registered teams
                                 for (DataSnapshot ds1 : dataSnapshot.getChildren()) {
                                     // Get team name and create the instance
-                                    Team team = new Team(ds1.getKey(), (String) ds1.child("name").getValue());
+                                    Team team = new Team(ds1.getKey(), ds1.child("name").getValue(String.class));
+
+                                    team.setColor(ds1.child("color").getValue(String.class));
 
                                     // Cycle all team members
                                     for (DataSnapshot ds2 : ds1.child("members").getChildren()) {
@@ -358,12 +357,6 @@ public class TurnGame implements Runnable {
                                     // Set the objective
                                     team.setObjective(objective);
                                     mRef.child("team/" + team.getId() + "/objective").setValue(o);
-
-                                    // Set color
-                                    String c = RandomPicker.pick(colorList);
-                                    colorList.remove(c);
-                                    team.setColor(c);
-                                    mRef.child("team/" + team.getId() + "/color").setValue(c);
 
                                     // Set initial money
                                     team.earnMoney(INITIAL_MONEY);
