@@ -9,8 +9,9 @@ public class RichObjective extends BaseObjective {
     private int mVictoryMoney;
     private Team mTeam;
 
-    public RichObjective(String description, int victoryMoney, Team team) {
-        super(description);
+    public RichObjective(int victoryMoney, Team team) {
+        super("Your objective is to become the kingpin of the city in the easiest way: buying the enemies. " +
+                "For you to win, you must have in your team reserve " + victoryMoney + " coins at the end of the turn");
         mVictoryMoney = victoryMoney;
         mTeam = team;
     }

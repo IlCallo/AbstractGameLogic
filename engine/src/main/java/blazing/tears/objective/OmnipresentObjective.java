@@ -10,8 +10,10 @@ public class OmnipresentObjective extends BaseObjective {
     private int mNumZones;
     private Team mTeam;
 
-    public OmnipresentObjective(String description, int numZones, Team team) {
-        super(description);
+    public OmnipresentObjective(int numZones, Team team) {
+        super("Your objective is to spread your spies in the city to become the puppeteer who holds the threads in " +
+                "the shadows of this cities, for you to win there must be at least one unit in  at least " + numZones
+                + " zones at the end of the turn");
         mNumZones = numZones;
         mTeam = team;
     }

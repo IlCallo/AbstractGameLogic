@@ -6,8 +6,9 @@ import blazing.tears.zone.BaseZone;
 public class ChaosObjective extends BaseObjective {
     private int mNumZones;
 
-    public ChaosObjective(String description, int numZones) {
-        super(description);
+    public ChaosObjective(int numZones) {
+        super("Your objective is to bring chaos in the city, for you to win "
+                + numZones + " zone must be chaotic at the end of the turn");
         mNumZones = numZones;
     }
 

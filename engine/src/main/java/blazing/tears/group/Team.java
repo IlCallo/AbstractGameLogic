@@ -1,13 +1,13 @@
 package blazing.tears.group;
 
-import blazing.tears.objective.Objective;
+import blazing.tears.objective.BaseObjective;
 import blazing.tears.role.Role;
 import blazing.tears.role.RoleProvider;
 
 import java.util.Map;
 
 public class Team extends BaseGroup {
-    private Objective mObjective;
+    private BaseObjective mObjective;
     private String mColor;
     private int mMoney;
     private Map<Role, Integer> mRolePool;
@@ -21,11 +21,11 @@ public class Team extends BaseGroup {
         mRolePool = RoleProvider.getInitialRolePool();
     }
 
-    public Objective getObjective() {
+    public BaseObjective getObjective() {
         return mObjective;
     }
 
-    public void setObjective(Objective objective) {
+    public void setObjective(BaseObjective objective) {
         mObjective = objective;
     }
 

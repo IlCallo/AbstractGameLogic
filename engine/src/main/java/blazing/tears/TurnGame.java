@@ -332,31 +332,31 @@ public class TurnGame implements Runnable {
 
                                     // Choose a random objective
                                     String o = RandomPicker.pick(objectiveList);
-                                    Objective objective = null;
+                                    BaseObjective objective = null;
 
                                     switch (o) {
                                         case CHAOS_OBJECTIVE:
-                                            objective = new ChaosObjective("", CHAOS_OBJECTIVE_NUM);
+                                            objective = new ChaosObjective(CHAOS_OBJECTIVE_NUM);
                                             break;
                                         case CONTROL_OBJECTIVE:
-                                            objective = new ControlObjective("", CONTROL_OBJECTIVE_NUM, team);
+                                            objective = new ControlObjective(CONTROL_OBJECTIVE_NUM, team);
                                             break;
                                         case RICH_OBJECTIVE:
-                                            objective = new RichObjective("", RICH_OBJECTIVE_NUM, team);
+                                            objective = new RichObjective(RICH_OBJECTIVE_NUM, team);
                                             break;
                                         case OMNIPRESENT_OBJECTIVE:
-                                            objective = new OmnipresentObjective("", OMNIPRESENT_OBJECTIVE_NUM, team);
+                                            objective = new OmnipresentObjective(OMNIPRESENT_OBJECTIVE_NUM, team);
                                             break;
                                         case PEACEFUL_OBJECTIVE:
-                                            objective = new PeacefulObjective("", PEACEFUL_OBJECTIVE_NUM);
+                                            objective = new PeacefulObjective(PEACEFUL_OBJECTIVE_NUM);
                                             break;
                                     }
 
                                     objectiveList.remove(o);
 
-                                    // Set the objective
+                                    // Set the objective and upload objective description
                                     team.setObjective(objective);
-                                    mRef.child("team/" + team.getId() + "/objective").setValue(o);
+                                    mRef.child("team/" + team.getId() + "/objective").setValue(objective.getDescription());
 
                                     // Set initial money
                                     team.earnMoney(INITIAL_MONEY);
