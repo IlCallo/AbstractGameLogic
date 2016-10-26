@@ -1,19 +1,15 @@
 package blazing.tears.actor;
 
+import blazing.tears.action.BaseAction;
 import blazing.tears.role.BaseRole;
 
 public abstract class BaseActor {
     private String mId;
     private BaseRole mRole;
+    private BaseAction mAction;
 
     public BaseActor(String id) {
         mId = id;
-    }
-
-    public BaseActor(String id, BaseRole role) {
-        mId = id;
-        mRole = role;
-
     }
 
     public String getId() {
@@ -32,11 +28,20 @@ public abstract class BaseActor {
         mRole = role;
     }
 
+    public BaseAction getAction() {
+        return mAction;
+    }
+
+    public void setAction(BaseAction action) {
+        mAction = action;
+    }
+
     @Override
     public String toString() {
         return "BaseActor{" +
                 "mId='" + mId + '\'' +
                 ", mRole=" + mRole +
+                ", mAction=" + mAction +
                 '}';
     }
 }

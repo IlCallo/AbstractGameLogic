@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static blazing.tears.action.Action.*;
 import static blazing.tears.role.Role.*;
 
 // TODO: is it possible to do this by setting all main.role classes with static content?
@@ -21,10 +22,11 @@ public class RoleProvider {
         aMap.put(COLLECTOR, new CollectorRole());
         aMap.put(UNTOUCHABLE, new UntouchableRole());
         aMap.put(MULTITASKING, new MultitaskingRole());
+        aMap.put(UNSPECIFIED, null);
         sRoles = Collections.unmodifiableMap(aMap);
     }
 
-    static public BaseRole getRole(String name) {
+    static public BaseRole getRole(Role name) {
         return sRoles.get(name);
     }
 
@@ -41,40 +43,37 @@ public class RoleProvider {
 
     public static class CopRole extends BaseRole {
         public CopRole() {
-            super(COP.name(), Arrays.asList(ActionProvider.getAction(ActionProvider.PROTECT_ACTION),
-                    ActionProvider.getAction(ActionProvider.CALM_ACTION)));
+            super(COP.name(), Arrays.asList(ActionProvider.getAction(PROTECT), ActionProvider.getAction(CALM)));
         }
     }
 
     public static class AssassinRole extends BaseRole {
         public AssassinRole() {
-            super(ASSASSIN.name(), Arrays.asList(ActionProvider.getAction(ActionProvider.ASSASSINATE_ACTION),
-                    ActionProvider.getAction(ActionProvider.DEMOLISH_ACTION)));
+            super(ASSASSIN.name(), Arrays.asList(ActionProvider.getAction(ASSASSINATE), ActionProvider.getAction(DEMOLISH)));
         }
     }
 
     public static class BuilderRole extends BaseRole {
         public BuilderRole() {
-            super(BUILDER.name(), Arrays.asList(ActionProvider.getAction(ActionProvider.BUILD_ACTION),
-                    ActionProvider.getAction(ActionProvider.PANIC_ACTION)));
+            super(BUILDER.name(), Arrays.asList(ActionProvider.getAction(BUILD), ActionProvider.getAction(PANIC)));
         }
     }
 
     public static class CollectorRole extends BaseRole {
         public CollectorRole() {
-            super(COLLECTOR.name(), Collections.singletonList(ActionProvider.getAction(ActionProvider.COLLECT_ACTION)));
+            super(COLLECTOR.name(), Collections.singletonList(ActionProvider.getAction(COLLECT)));
         }
     }
 
     public static class UntouchableRole extends BaseRole {
         public UntouchableRole() {
-            super(UNTOUCHABLE.name(), Collections.emptyList());
+            super(UNTOUCHABLE.name());
         }
     }
 
     public static class MultitaskingRole extends BaseRole {
         public MultitaskingRole() {
-            super(MULTITASKING.name(), Collections.emptyList());
+            super(MULTITASKING.name());
         }
     }
 }

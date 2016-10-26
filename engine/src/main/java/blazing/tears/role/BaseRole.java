@@ -2,6 +2,7 @@ package blazing.tears.role;
 
 import blazing.tears.action.BaseAction;
 
+import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseRole {
@@ -9,7 +10,7 @@ public abstract class BaseRole {
     private List<BaseAction> mActions;
 
     public BaseRole(String name) {
-        mName = name;
+        this(name, Collections.emptyList());
     }
 
     public BaseRole(String name, List<BaseAction> actions) {

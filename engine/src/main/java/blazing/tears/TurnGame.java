@@ -246,7 +246,6 @@ public class TurnGame implements Runnable {
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         for (BaseZone z : zones) {
                             MutableData localMutableData = mutableData.child(Integer.toString(z.getId()));
-                            localMutableData.child("id").setValue(z.getId());
                             localMutableData.child("cost").setValue(z.getCost());
                             localMutableData.child("description").setValue(z.getDescription());
                             localMutableData.child("chaotic").setValue(false);
@@ -323,8 +322,10 @@ public class TurnGame implements Runnable {
 
                                         mRef.child("unit/" + unitId + "/startPosition").setValue(startZone.getCenter());
                                         mRef.child("unit/" + unitId + "/ready").setValue(false);
-                                        mRef.child("unit/" + unitId + "/lastBeat").setValue(null);
+                                        //TODO useless with database reset
+                                        mRef.child("unit/" + unitId + "/lastOnline").setValue(null);
                                         mRef.child("unit/" + unitId + "/lastPosition").setValue(null);
+                                        mRef.child("unit/" + unitId + "/zone").setValue(null);
 
                                         // Add the unit to the team members
                                         team.addMember(unit);

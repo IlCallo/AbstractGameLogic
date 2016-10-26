@@ -1,6 +1,6 @@
 package blazing.tears.zone;
 
-import blazing.tears.role.RoleProvider;
+import static blazing.tears.role.Role.UNTOUCHABLE;
 
 public class ImmuneZone extends BaseZone {
 
@@ -10,6 +10,6 @@ public class ImmuneZone extends BaseZone {
 
     @Override
     protected void powerUp() {
-        getController().getRolePool().put(RoleProvider.UNTOUCHABLE_ROLE, 1);
+        getController().getRolePool().put(UNTOUCHABLE, 1);
     }
 }

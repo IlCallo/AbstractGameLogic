@@ -1,15 +1,19 @@
 package blazing.tears.zone;
 
 import blazing.tears.Building;
+import blazing.tears.FirebaseSync;
+import blazing.tears.GameLogger;
 import blazing.tears.actor.Unit;
 import blazing.tears.group.Team;
 import com.firebase.geofire.GeoLocation;
+import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
-public abstract class BaseZone extends PowerUp {
+public abstract class BaseZone extends PowerUp implements FirebaseSync {
     private int mId;
     private int mCost;
     private String mDescription;
@@ -165,5 +169,27 @@ public abstract class BaseZone extends PowerUp {
         y = y / pointCount;
 
         return new GeoLocation(x, y);
+    }
+
+    @Override
+    public void sync() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("zone/" + getId());
+        Logger logger = GameLogger.instance();
+
+        logger.info("Zone " + getId() + " is now synchronizing");
+
+        // Sync chaotic status
+        ref.child("chaotic").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mChaotic = dataSnapshot.getValue(Boolean.class);
+                logger.info("Zone " + getId() + " is now " + (mChaotic ? "" : "not") + " chaotic");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                logger.warning(databaseError.toException().toString());
+            }
+        });
     }
 }

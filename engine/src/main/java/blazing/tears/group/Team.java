@@ -1,12 +1,16 @@
 package blazing.tears.group;
 
+import blazing.tears.FirebaseSync;
+import blazing.tears.GameLogger;
 import blazing.tears.objective.BaseObjective;
 import blazing.tears.role.Role;
 import blazing.tears.role.RoleProvider;
+import com.google.firebase.database.*;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
-public class Team extends BaseGroup {
+public class Team extends BaseGroup implements FirebaseSync {
     private BaseObjective mObjective;
     private String mColor;
     private int mMoney;
@@ -59,5 +63,27 @@ public class Team extends BaseGroup {
 
     public void setRolePool(Map<Role, Integer> rolePool) {
         mRolePool = rolePool;
+    }
+
+    @Override
+    public void sync() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("team/" + getId());
+        Logger logger = GameLogger.instance();
+
+        logger.info("Team " + getId() + " with name " + getName() + " and color " + mColor + " is now synchronizing");
+
+        // Sync money reserve
+        ref.child("money").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mMoney = dataSnapshot.getValue(Long.class).intValue();
+                logger.info("Team " + getId() + " has now " + mMoney + " in his reserve");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                logger.warning(databaseError.toException().toString());
+            }
+        });
     }
 }

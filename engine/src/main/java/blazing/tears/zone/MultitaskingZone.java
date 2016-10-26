@@ -1,6 +1,6 @@
 package blazing.tears.zone;
 
-import blazing.tears.role.RoleProvider;
+import static blazing.tears.role.Role.MULTITASKING;
 
 public class MultitaskingZone extends BaseZone {
 
@@ -10,6 +10,6 @@ public class MultitaskingZone extends BaseZone {
 
     @Override
     protected void powerUp() {
-        getController().getRolePool().put(RoleProvider.MULTITASKING_ROLE, 1);
+        getController().getRolePool().put(MULTITASKING, 1);
     }
 }

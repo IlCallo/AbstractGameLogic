@@ -1,8 +1,10 @@
 package blazing.tears.zone;
 
-import blazing.tears.role.RoleProvider;
+import blazing.tears.role.Role;
 
 import java.util.Map;
+
+import static blazing.tears.role.Role.*;
 
 public class RoleZone extends BaseZone {
 
@@ -12,9 +14,9 @@ public class RoleZone extends BaseZone {
 
     @Override
     protected void powerUp() {
-        Map<String, Integer> rolePool = getController().getRolePool();
-        rolePool.put(RoleProvider.COP_ROLE, 3);
-        rolePool.put(RoleProvider.ASSASSIN_ROLE, 3);
-        rolePool.put(RoleProvider.BUILDER_ROLE, 3);
+        Map<Role, Integer> rolePool = getController().getRolePool();
+        rolePool.put(COP, 3);
+        rolePool.put(ASSASSIN, 3);
+        rolePool.put(BUILDER, 3);
     }
 }

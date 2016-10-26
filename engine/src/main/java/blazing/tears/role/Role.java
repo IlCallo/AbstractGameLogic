@@ -1,4 +1,3 @@
 package blazing.tears.role;
 
-
 public enum Role {COP, ASSASSIN, BUILDER, COLLECTOR, UNTOUCHABLE, MULTITASKING, UNSPECIFIED}
