@@ -4,10 +4,13 @@ import com.google.firebase.database.DatabaseReference;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static blazing.tears.constant.GameStatus.INACTIVE;
 
 public class DatabaseInitializer {
+    private static final Logger LOG = Logger.getLogger(DatabaseInitializer.class.getName());
+
     private static final int TEAM_NUM = 5;
     private static final int TEAM_UNIT_NUM = 5;
     private static final List<String> TEAM_NAMES = Arrays.asList("Crotali di Satana", "Teemonomicon", "World Wide Derp",
@@ -15,10 +18,19 @@ public class DatabaseInitializer {
     private static final List<String> TEAM_COLORS = Arrays.asList("red", "white", "yellow", "green", "purple");
 
     public static void setup(DatabaseReference ref) {
+        LOG.fine("Initializing the database");
+
         // Clean the database
         ref.setValue(null);
         // Game status is now inactive
-        ref.child("game").setValue(INACTIVE);
+        ref.child("game/status").setValue(INACTIVE);
+
+        // Set board center and radius
+        ref.child("game/board/center/latitude").setValue(44.698403);
+        ref.child("game/board/center/longitude").setValue(10.631783);
+        ref.child("game/board/radius").setValue(0.825);
+
+        LOG.fine("Creating dummy teams and units");
 
         // Creates teams, units for every team and add them to firebase
         for (int i = 0; i < TEAM_NUM; i++) {

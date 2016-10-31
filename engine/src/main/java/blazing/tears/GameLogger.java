@@ -16,7 +16,7 @@ public class GameLogger {
 
             try {
                 // This block configure the logger with handler and formatter
-                mFileHandler = new FileHandler("GameLogger_" + format.format(Calendar.getInstance().getTime()) + ".log");
+                mFileHandler = new FileHandler("logs/GameLogger_" + format.format(Calendar.getInstance().getTime()) + ".log");
                 mLogger.addHandler(mFileHandler);
                 SimpleFormatter formatter = new SimpleFormatter();
                 mFileHandler.setFormatter(formatter);

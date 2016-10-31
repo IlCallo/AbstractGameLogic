@@ -11,6 +11,6 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'com.google.firebase:firebase-server-sdk:[3.0.0,)'
+    compile 'com.google.firebase:firebase-server-sdk:3.0.1'
     compile 'com.firebase:geofire-java:2.0.0'
 }

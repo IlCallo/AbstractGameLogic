@@ -16,6 +16,8 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.*;
 
+import java.awt.*;
+import java.awt.geom.Path2D;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.logging.Logger;
 
 import static blazing.tears.constant.GamePhase.*;
 import static blazing.tears.constant.GameStatus.*;
+import static blazing.tears.role.Role.UNSPECIFIED;
 
 
 public class TurnGame implements Runnable {
@@ -102,11 +105,29 @@ public class TurnGame implements Runnable {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
-        // Clean/reset the database with dummy data
-        DatabaseInitializer.setup(ref);
+        // Connection bug
+        ref.child(".info/connected").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue(Boolean.class) == Boolean.TRUE) {
+                    LOG.fine("Connected to Firebase");
 
-        // start new game on his own thread
-        (new Thread(new TurnGame(ref))).start();
+                    // TODO Clean/reset the database with dummy data
+                    DatabaseInitializer.setup(ref);
+
+                    // start new game on his own thread
+                    (new Thread(new TurnGame(ref))).start();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                LOG.log(Level.SEVERE, databaseError.toException().toString(), databaseError.toException());
+            }
+        });
+
+        while (true) {
+        }
     }
 
     public int getTurn() {
@@ -193,8 +214,8 @@ public class TurnGame implements Runnable {
         mRef.child("game/board").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                double lat = (double) dataSnapshot.child("center/latitude").getValue();
-                double lng = (double) dataSnapshot.child("center/longitude").getValue();
+                double lat = dataSnapshot.child("center/latitude").getValue(Double.class);
+                double lng = dataSnapshot.child("center/longitude").getValue(Double.class);
                 GeoLocation center = new GeoLocation(lat, lng);
 
                 double radius = (double) dataSnapshot.child("radius").getValue();
@@ -322,10 +343,21 @@ public class TurnGame implements Runnable {
 
                                         mRef.child("unit/" + unitId + "/startPosition").setValue(startZone.getCenter());
                                         mRef.child("unit/" + unitId + "/ready").setValue(false);
+
+                                        mRef.child("unit/" + unitId + "/money").setValue(0);
+                                        mRef.child("unit/" + unitId + "/role").setValue(UNSPECIFIED);
                                         //TODO useless with database reset
                                         mRef.child("unit/" + unitId + "/lastOnline").setValue(null);
                                         mRef.child("unit/" + unitId + "/lastPosition").setValue(null);
                                         mRef.child("unit/" + unitId + "/zone").setValue(null);
+
+                                        //TODO set the starting zone as position
+                                        //mRef.child("unit/" + unitId + "/zone").setValue(startZone.getId());
+                                        //mRef.child("unit/" + unitId + "/lastPosition").setValue(startZone.getCenter());
+
+                                        //TODO randomly set a position directly in the starting zone
+                                        mRef.child("unit/" + unitId + "/zone").setValue(startZone.getId());
+                                        mRef.child("unit/" + unitId + "/lastPosition").setValue(generatePoint(startZone.getPerimeter()));
 
                                         // Add the unit to the team members
                                         team.addMember(unit);
@@ -583,5 +615,24 @@ public class TurnGame implements Runnable {
     }
 
     private void turn() {
+    }
+
+    private GeoLocation generatePoint(ArrayList<GeoLocation> perimeter) {
+        Path2D region = new Path2D.Double();
+
+        region.moveTo(perimeter.get(0).latitude, perimeter.get(0).longitude);
+        for (int idx = 1; idx < perimeter.size(); idx++)
+            region.lineTo(perimeter.get(idx).latitude,
+                    perimeter.get(idx).longitude);
+        region.closePath();
+
+        Rectangle r = region.getBounds();
+        double x, y;
+        do {
+            x = r.getX() + r.getWidth() * Math.random();
+            y = r.getY() + r.getHeight() * Math.random();
+        } while (!region.contains(x, y));
+
+        return new GeoLocation(x, y);
     }
 }

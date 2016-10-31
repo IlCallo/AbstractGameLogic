@@ -72,8 +72,10 @@ public class Unit extends BaseActor implements FirebaseSync {
         ref.child("zone").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mZone = dataSnapshot.getValue(Long.class).intValue();
-                logger.info("Unit " + getId() + " moved to zone " + mZone);
+                if (dataSnapshot.exists()) {
+                    mZone = dataSnapshot.getValue(Long.class).intValue();
+                    logger.info("Unit " + getId() + " moved to zone " + mZone);
+                }
             }
 
             @Override
@@ -86,24 +88,11 @@ public class Unit extends BaseActor implements FirebaseSync {
         ref.child("lastPosition").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mLocation = new GeoLocation(dataSnapshot.child("latitude").getValue(Double.class),
-                        dataSnapshot.child("longitude").getValue(Double.class));
-                logger.info("Unit " + getId() + " moved to position " + mLocation);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                logger.warning(databaseError.toException().toString());
-            }
-        });
-
-        // Sync location
-        ref.child("lastPosition").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mLocation = new GeoLocation(dataSnapshot.child("latitude").getValue(Double.class),
-                        dataSnapshot.child("longitude").getValue(Double.class));
-                logger.info("Unit " + getId() + " moved to position " + mLocation);
+                if (dataSnapshot.exists()) {
+                    mLocation = new GeoLocation(dataSnapshot.child("latitude").getValue(Double.class),
+                            dataSnapshot.child("longitude").getValue(Double.class));
+                    logger.info("Unit " + getId() + " moved to position " + mLocation);
+                }
             }
 
             @Override
@@ -130,8 +119,10 @@ public class Unit extends BaseActor implements FirebaseSync {
         ref.child("action").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                setAction(ActionProvider.getAction(Action.valueOf(dataSnapshot.getValue(String.class))));
-                logger.info("Unit " + getId() + " action is now " + getAction());
+                if (dataSnapshot.exists()) {
+                    setAction(ActionProvider.getAction(Action.valueOf(dataSnapshot.getValue(String.class))));
+                    logger.info("Unit " + getId() + " action is now " + getAction());
+                }
             }
 
             @Override
