@@ -49,7 +49,7 @@ public class DatabaseInitializer {
 
             // Custom accounts to test the app
             if (i == 1) {
-                DatabaseReference unitRef = ref.child("unit").push();
+                DatabaseReference unitRef = ref.child("unit/7g32vZ6Pw1MHU2Fm0oZ9hbYpmPv1");
                 unitRef.child("email").setValue("o.o_callo_o.o@hotmail.it");
                 unitRef.child("team").setValue(teamRef.getKey());
 
@@ -57,7 +57,7 @@ public class DatabaseInitializer {
             }
 
             if (i == 2) {
-                DatabaseReference unitRef = ref.child("unit").push();
+                DatabaseReference unitRef = ref.child("unit/MyJDDb9WmHPUCuIeHTqbFQbIdJn2");
                 unitRef.child("email").setValue("fbonnab@gmail.com");
                 unitRef.child("team").setValue(teamRef.getKey());
 
@@ -65,7 +65,7 @@ public class DatabaseInitializer {
             }
 
             if (i == 3) {
-                DatabaseReference unitRef = ref.child("unit").push();
+                DatabaseReference unitRef = ref.child("unit/IpTzc5KKiNYigtPQaEvnIZMZNNS2");
                 unitRef.child("email").setValue("pcalloc@gmail.com");
                 unitRef.child("team").setValue(teamRef.getKey());
 
@@ -73,7 +73,7 @@ public class DatabaseInitializer {
             }
 
             if (i == 4) {
-                DatabaseReference unitRef = ref.child("unit").push();
+                DatabaseReference unitRef = ref.child("unit/hZuNKH7CqhfGZG4VUDZzunHHv3e2");
                 unitRef.child("email").setValue("callo92thebest@yahoo.it");
                 unitRef.child("team").setValue(teamRef.getKey());
 
