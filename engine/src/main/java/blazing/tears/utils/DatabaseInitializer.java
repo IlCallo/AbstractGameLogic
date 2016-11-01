@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static blazing.tears.constant.GamePhase.CONTROL;
 import static blazing.tears.constant.GameStatus.INACTIVE;
 
 public class DatabaseInitializer {
@@ -24,6 +25,12 @@ public class DatabaseInitializer {
         ref.setValue(null);
         // Game status is now inactive
         ref.child("game/status").setValue(INACTIVE);
+
+        // Default game phase is control
+        ref.child("game/phase").setValue(CONTROL);
+
+        // Set dummy timer at 0
+        ref.child("game/timer").setValue(0);
 
         // Set board center and radius
         ref.child("game/board/center/latitude").setValue(44.698403);

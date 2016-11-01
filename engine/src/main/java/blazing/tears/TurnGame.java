@@ -6,6 +6,7 @@ import blazing.tears.constant.GameStatus;
 import blazing.tears.event.*;
 import blazing.tears.group.Team;
 import blazing.tears.objective.*;
+import blazing.tears.role.Role;
 import blazing.tears.role.RoleProvider;
 import blazing.tears.utils.BoardFactory;
 import blazing.tears.utils.DatabaseInitializer;
@@ -20,10 +21,7 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -394,6 +392,15 @@ public class TurnGame implements Runnable {
                                     // Set initial money
                                     team.earnMoney(INITIAL_MONEY);
                                     mRef.child("team/" + team.getId() + "/money").setValue(INITIAL_MONEY);
+
+                                    // Set loanOverflow to false
+                                    mRef.child("team/" + team.getId() + "/loanOverflow").setValue(false);
+
+                                    // Set team role pool
+                                    for (Map.Entry<Role, Integer> entry : team.getRolePool().entrySet()) {
+                                        mRef.child("team/" + team.getId() + "/roles/" + entry.getKey().name())
+                                                .setValue(entry.getValue());
+                                    }
 
                                     // Add the team to the team lists
                                     mTeams.add(team);
