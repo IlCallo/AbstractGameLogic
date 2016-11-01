@@ -351,13 +351,13 @@ public class TurnGame implements Runnable {
                                         mRef.child("unit/" + unitId + "/lastPosition").setValue(null);
                                         mRef.child("unit/" + unitId + "/zone").setValue(null);
 
-                                        //TODO set the starting zone as position
-                                        //mRef.child("unit/" + unitId + "/zone").setValue(startZone.getId());
-                                        //mRef.child("unit/" + unitId + "/lastPosition").setValue(startZone.getCenter());
-
-                                        //TODO randomly set a position directly in the starting zone
+                                        // TODO dummy data
                                         mRef.child("unit/" + unitId + "/zone").setValue(startZone.getId());
+                                        //TODO set the starting zone as position
+                                        //mRef.child("unit/" + unitId + "/lastPosition").setValue(startZone.getCenter());
+                                        //TODO randomly set a position directly in the starting zone
                                         mRef.child("unit/" + unitId + "/lastPosition").setValue(generatePoint(startZone.getPerimeter()));
+                                        mRef.child("zone/" + startZone.getId() + "/units/" + unitId).setValue(true);
 
                                         // Add the unit to the team members
                                         team.addMember(unit);
