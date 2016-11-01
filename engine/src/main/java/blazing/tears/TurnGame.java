@@ -393,8 +393,8 @@ public class TurnGame implements Runnable {
                                     team.earnMoney(INITIAL_MONEY);
                                     mRef.child("team/" + team.getId() + "/money").setValue(INITIAL_MONEY);
 
-                                    // Set loanOverflow to false
-                                    mRef.child("team/" + team.getId() + "/loanOverflow").setValue(false);
+                                    // Set loanRequest to 0
+                                    mRef.child("team/" + team.getId() + "/loanRequest").setValue(0);
 
                                     // Set team role pool
                                     for (Map.Entry<Role, Integer> entry : team.getRolePool().entrySet()) {
