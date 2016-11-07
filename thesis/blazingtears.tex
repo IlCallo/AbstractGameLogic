@@ -6,7 +6,7 @@
 % that's why they are commented below with a double %
 \documentclass[
 	%cucitura,				% To decomment when the printable version is needed
-	draft,					% Comment after final revision, also hides images
+	%draft,					% Comment after final revision, also hides images
 	twoside]				% Print on both side of the page
 	{toptesi}				% We'll be using the toptesi class
 
@@ -54,13 +54,18 @@
 \makeindex					% ??
 \lstset{
 	basicstyle=\small\ttfamily,	% Display code in small font size and normal spacing
-	language=Java,			% Displayed code will  be Java
+	language=Java,			% Displayed code will be Java
 	numbers=left,			% Line numbers are placed to the left
 	numberstyle=\tiny,		% Line numbers have tiny font size
-	stepnumber=5,			% Put a line number ever 5 lines
+	stepnumber=2,			% Put a line number ever 2 lines
 	tabsize=4,				% Tabs takes are 4 spaces wide
+	showspaces=false,		% Hides spaces representation
+	showstringspaces=false,	% Hide spaces underline within strings only
+	breaklines=true,		% Sets automatic line breaking
+	breakatwhitespace=true,	% Sets if automatic breaks should only happen at whitespace
 	columns=fullflexible,	% To keep chars natural width (no distorsion)
-	keepspaces=true
+	captionpos=b,			% Put caption at bottom of listings
+	escapechar=!			% Escape char to use 
 }
 
 %%% DOCUMENT
@@ -87,8 +92,6 @@
 	\input{main/design}
 	
 	\input{main/implementation}
-	
-	\input{main/augmented}
 	
 	\input{main/results}
 	

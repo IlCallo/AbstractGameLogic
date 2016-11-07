@@ -242,7 +242,7 @@ public class TurnGame implements Runnable {
 
                 // Load events reference
                 for (BaseEvent event : mEvents) {
-                    mRef.child("game/event/possible").push().setValue(event.getName());
+                    mRef.child("game/event/possible/" + event.getName()).setValue(true);
                 }
 
                 // Initialize zones and board
@@ -362,7 +362,7 @@ public class TurnGame implements Runnable {
                                     }
 
                                     // Choose a random objective
-                                    String o = RandomPicker.pick(objectiveList);
+                                    String o = RandomPicker.extract(objectiveList);
                                     BaseObjective objective = null;
 
                                     switch (o) {
@@ -382,8 +382,6 @@ public class TurnGame implements Runnable {
                                             objective = new PeacefulObjective(PEACEFUL_OBJECTIVE_NUM);
                                             break;
                                     }
-
-                                    objectiveList.remove(o);
 
                                     // Set the objective and upload objective description
                                     team.setObjective(objective);
@@ -448,7 +446,7 @@ public class TurnGame implements Runnable {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                LOG.log(Level.SEVERE, databaseError.toException().toString(), databaseError.toException());
             }
         });
     }

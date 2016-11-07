@@ -10,7 +10,7 @@ import java.util.Map;
 import static blazing.tears.action.Action.*;
 import static blazing.tears.role.Role.*;
 
-// TODO: is it possible to do this by setting all main.role classes with static content?
+// TODO: is it possible to do this by setting all role classes with static content?
 public class RoleProvider {
     static private final Map<Role, BaseRole> sRoles;
 

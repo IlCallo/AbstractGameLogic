@@ -19,10 +19,10 @@ public class BoardFactory {
     /**
      * @param center   A GeoPosition object which will be the center of the board
      * @param radius Diameter of the board, in km
-     * @return The main.Board instance
+     * @return The Board instance
      */
     public static Board createBoard(GeoLocation center, double radius, List<BaseZone> zones) {
-        LOG.log(Level.FINE, "main.Board will be centered on {0} and will have a radius of {1} km", new Object[]{center, radius});
+        LOG.log(Level.FINE, "Board will be centered on {0} and will have a radius of {1} km", new Object[]{center, radius});
 
         // Allocate GeoPosition arrays for the zones points
         GeoLocation[][] coordinates = new GeoLocation[9][];
@@ -80,26 +80,23 @@ public class BoardFactory {
             int extCurrentZoneNum = currentZoneNum + 4;
             int extPrecedingZoneNum = precedingZoneNum + 4;
 
-            //LOG.log( Level.FINER, "currentZone: {0}, precedingZone: {1}, extCurrentZone: {2}, extPrecedingZone: {3}, angle: {4}",
-            // new Object[]{currentZoneNum, precedingZoneNum, extCurrentZoneNum, extPrecedingZoneNum, a});
-
             GeoLocation vertex = calcDest(center, 0.7432 * radius, a);
 
-            // degree of shift inside a single main.zone of first ring large arc
+            // degree of shift inside a single zone of first ring large arc
             float relativeShift = a % 90;
 
             // if division result is zero, the point is between two zones of first ring
             if (relativeShift == 0) {
                 // point shared between two areas of the first ring:
-                // first of the large arc for the current main.zone
-                // last of the large arc for the preceding main.zone
+                // first of the large arc for the current zone
+                // last of the large arc for the preceding zone
                 coordinates[currentZoneNum][3] = vertex;
                 coordinates[precedingZoneNum][7] = vertex;
 
-                // midpoint of little arc of main.zone on second ring
+                // midpoint of little arc of zone on second ring
                 coordinates[extPrecedingZoneNum][2] = vertex;
             } else {
-                // calculate the vertex index relative to the large arc of the main.zone in first ring
+                // calculate the vertex index relative to the large arc of the zone in first ring
                 // we must do (90 - relativeShift) because we are checking it in reverse order,
                 //    otherwise the index would be wrong for points 4 and 6
                 int index = (int) ((90 - relativeShift) / 22.5);
@@ -141,13 +138,13 @@ public class BoardFactory {
             // if division result is zero, the point is between two zones of second ring
             if (relativeShift == 0) {
                 // point shared between two areas of the second ring:
-                // first of the large arc for the current main.zone
-                // last of the large arc for the preceding main.zone
+                // first of the large arc for the current zone
+                // last of the large arc for the preceding zone
                 coordinates[currentZoneNum][5] = vertex;
                 coordinates[precedingZoneNum][11] = vertex;
 
             } else {
-                // calculate the vertex index relative to the large arc of the main.zone in second ring
+                // calculate the vertex index relative to the large arc of the zone in second ring
                 int index = relativeShift / 15;
                 // saves it in the right index
                 coordinates[currentZoneNum][index + 5] = vertex;

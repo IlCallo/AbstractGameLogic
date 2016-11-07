@@ -4,11 +4,11 @@
 		
 		\subsection{Team management}
 		
-			Considering the kind of main.event bounded to the game usage, something gets clearly on mind: the team registration must be done long \emph{before} the main.event.
+			Considering the kind of event bounded to the game usage, something gets clearly on mind: the team registration must be done long \emph{before} the event.
 			
 			For this, a simple website will be set-up. 
 			Teams will be able to enrol for events, specifying the emails of all team members and a reference person which will take care of the team management (eg. player removal or substitution).
-			In this way organizers will be able to directly communicate with all players of a given main.event.
+			In this way organizers will be able to directly communicate with all players of a given event.
 		
 		\subsection{Data storage and manipulation}
 			
@@ -31,8 +31,8 @@
 				\begin{itemize}
 					\item \textbf{initialization:} preparatory steps to execute before a match take place (initial status, board set-up);
 					\item \textbf{phases:} manages phase changes and the timers associated with it;
-					\item \textbf{objectives:} check every turn if a team reached his main.objective;
-					\item \textbf{events:} manages the probability of an main.event to take place, its random choice between the available ones and applies his effects;
+					\item \textbf{objectives:} check every turn if a team reached his objective;
+					\item \textbf{events:} manages the probability of an event to take place, its random choice between the available ones and applies his effects;
 					\item \textbf{status reset:} every temporary status changes (zones power-ups and events effects) is reset to his original status at the end of turn;
 					\item \textbf{power-up:} applies effects of the power-ups;
 					\item \textbf{log:} record all match actions and operations in order to enable post-match studies and replays.  
@@ -48,13 +48,18 @@
 				\begin{itemize}
 					\item \textbf{messenger:} a dedicated messenger will be provided to allow an in-game communication between team members;
 					\item \textbf{localization:} keeps track of players last known position and last time he was active;
-					\item \textbf{roles:} the main.role and main.action selection system will be entirely done by the app between the players, the server will only observe those operations;
-					\item \textbf{board visibility:} which part of the board, which other players and which markers to show to each player will be decided by the app, depending on the main.role and location of current player.
+					\item \textbf{roles:} the role and action selection system will be entirely done by the app between the players, the server will only observe those operations;
+					\item \textbf{board visibility:} which part of the board, which other players and which markers to show to each player will be decided by the app, depending on the role and location of current player.
 				\end{itemize}
 			
 	\section{Work flow}
+	\label{workflow:general}
 		
 		The game has a multiphase structure, one of which is turn based (the more important, the actual "gaming" part).
+	
+		\subsection{Inactive}
+		
+			The game has not yet been initialized, it's the default value when there is no game available.
 	
 		\subsection{Initialize}
 		
@@ -62,7 +67,7 @@
 			
 			\begin{enumerate}
 				\item The board centre and radius are fetched from the database;
-				\item Clean all data from previous game, in particular the random main.event probability and the turn counter are set to 0;
+				\item Clean all data from previous game, in particular the random event probability and the turn counter are set to 0;
 				\item Instantiate random events and reset set them as eligible to be drawn;
 				\item Instantiate zones;
 				\item Generate the board;
@@ -73,12 +78,12 @@
 				\begin{enumerate}					
 					\item For every member of the team:
 					\begin{enumerate}
-						\item Select the starting main.zone with fewer units already assigned to it;
-						\item Assign the unit to that starting main.zone;
-						\item Set unit starting position to the centre of that main.zone, reset his last position and last beat values, set him as not ready to start the game;
+						\item Select the starting zone with fewer units already assigned to it;
+						\item Assign the unit to that starting zone;
+						\item Set unit starting position to the centre of that zone, reset his last position and last beat values, set him as not ready to start the game;
 						\item Increase the counter that keeps track of the users that play this game;
 					\end{enumerate}
-					\item Randomly chose an available main.objective and assign it to the team;
+					\item Randomly chose an available objective and assign it to the team;
 					\item Set the initial team's money reserve;
 				\end{enumerate}
 			\end{enumerate}
@@ -88,6 +93,7 @@
 			During this phase, the units must reach their starting point: once everyone is within 10 meters from it, all listeners on the database are initialized and then the game is started.
 		
 		\subsection{Start}
+		\label{workflow:start}
 			
 			This is the core phase of the game: it's a loop which every turn execute three logical sub-phases.
 				
@@ -95,30 +101,264 @@
 			
 				Here the turn preparation is done: this part does not interact with the users in any way, considering that are mostly checks and various game status automatic changes.
 			
-				The first check performed is on the victory criteria: all teams' main.objective is checked against the current game status. If one of them is fulfilled, the games ends.
+				The first check performed is on the victory criteria: all teams' objective is checked against the current game status. If one of them is fulfilled, the games ends.
 				
 				Then, as first operation of the new turn, the turn counter is increased, its value is updated on the database and all temporary conditions are reset to their defaults.
 				
-				The second check is on the random main.event: if there is at least one available main.event to fire out, a randomly generated percentage number is tested against the current main.event probability and, if it's lesser or equal, the main.event is fired and the main.event probability is reset to a minimum value.
+				The second check is on the random event: if there is at least one available event to fire out, a randomly generated percentage number is tested against the current event probability and, if it's lesser or equal, the event is fired and the event probability is reset to a minimum value.
 				In case the probability is set to 0.00 (possible only if it's the first turn), it is instead set to a minimum value and the test is skipped.
 				
 				Lastly, the bonus gained by the controlled zones is applied.
 				
 			\subsubsection{Roles}
 			
-				Here the roles selection system is activated and players will choose their main.role and main.action for that turn following the rules explained in \autoref{nolead:main.role}.
-				The server will only set the timer (four minutes) and manage possible main.role conflicts at the end of it.
-				After giving the main.role, another timer (one minute) is set to let them decide the main.action.
-			
+				Here the roles selection system is activated and players will choose their role for that turn following the rules explained in \autoref{nolead:role}.
+				The server will manage the timer of four minutes.
+				
+			\subsubsection{Actions}
+				
+				After giving the role, another timer, one minute long, is set to let them choose the action.
+				
+			\subsubsection{Money}
+				
+				Lastly, the money are taken by the players from team reserve as explained in \autoref{nolead:money}.
+				This sub-phase also last one minute.
+							
 			\subsubsection{Turn}
 			
 				Here the real game take place: the server will keep a timer of fifteen minutes during which the players can act following their team objectives or disrupting others plans.
-				Every main.action will be performed directly on the app communicating to the database without server interaction, but this does not mean that it will stay idle: every main.action made on the database, as well as every player movement, will be recorded by the server on a log file from which will then be possible to re-run the match replay in order to get statistics and to study it.
+				Every action will be performed directly on the app communicating to the database without server interaction, but this does not mean that it will stay idle: every action made on the database, as well as every player movement, will be recorded by the server on a log file from which will then be possible to re-run the match replay in order to get statistics and to study it.
 			
 		\subsection{End}
 		
-			All players are notified that the game is ended and who's the winner, then a gathering point is given to all players that must reach it in order to meet-up with organizers and continue the main.event: likely the winner team will be awarded at this point with the possible prize.
+			All players are notified that the game is ended and who's the winner, then a gathering point is given to all players that must reach it in order to meet-up with organizers and continue the event: likely the winner team will be awarded at this point with the possible prize.
 			
-	\section{Class abstractions}
+	\section{Data model}	
+		
+		Data are modelled both on Firebase with his internal rules and in Android/Java with classic Java interfaces/classes.
+		Android model is a simplified version of the Java one, with many fields which are changed from custom classes to simple strings, because the clients only need a subset of the operations needed by the server and cannot access all informations (many are restricted based on who's reading them).
+		
+		\subsection{Firebase model}
+			
+			In Firebase there is no concept of "data model" and the data structure definition de facto relies on the powerful yet flexible rule system which manage data access and manipulation.
+			The rule system allows to validate incoming data with a JavaScript-like language encapsulated in a JSON and to define constraints, for examples, on which children a particular branch must have in order to be valid. This can be seen as defining a constructor in Java which enforce the initialization of mandatory fields.
+			
+			Considering that some lines are pretty much the same over various rule definitions, some kind of legend can be useful to cover the more common ones.
+			
+			\begin{itemize}
+				\item \lstinline|".validate" : "newData.hasChildren(['field1', 'field2', ...])"]| \\ if this branch is defined, then the specified fields must be present defined as well;
+				\item \lstinline|["$other" : { ".validate" : false }]| \\ any field different from the ones specified cannot be defined;
+			\end{itemize}
+			
+			Firebase model is obviously simpler and looser than it's Java counterpart and has at top level only four branches.
+			
+			
+			\subsubsection{Game}
+			
+				\lstinputlisting[caption=Game branch rules,
+								firstline=3,
+								lastline=65]{main/listings/firebase.json}
+				
+				All data needed to manage a game instance is contained here.
+				Everybody can read at this location, but no one (except the server service account) has write permission, as shown at line~\ref{firebase:game:read} and~\ref{firebase:game:write}.
+				
+				\paragraph{status - line~\ref{firebase:game:status}}
+				Represent the status in which the game can be, as seen in \autoref{workflow:general}, plus \emph{PAUSE} and \emph{RESUME}.
+				His Java counterpart is an enumeration class, and his content \emph{must} reflect the literal representation of that enumeration.
+				This is used by the application and the server to check in which status the game is, considering that both are designed to take into account crashes and disconnection and just resume where the game was left as soon as they reconnect.
+				Some application components, like the one which display the users on the map as described in \autoref{focus:map}, even use this information to alter their internal status and change their appearance.
+				
+				\paragraph{phase - line~\ref{firebase:game:phase}}
+				Works in the same way, and with similar use cases, to the status field.
+				Keeps track of the current phase while in \emph{START}, as seen in \autoref{workflow:start}.
+				
+				\paragraph{board - line~\ref{firebase:game:board}}
+				Used mostly during \emph{INITIALIZE} operations to generate the game board, see \autoref{focus:board}.
+				Contains the centre and radius of the board itself.
+				
+				\paragraph{unitsToWait - line~\ref{firebase:game:wait}}
+				Used during \emph{PREPARE} to keep track of how many units have yet to reach their starting position.
+				It's initialized with the total number of players during \emph{INITIALIZE} and decremented by 1 every time a unit reach his starting position.
+				Instead, if a unit who already reached it move away from it, the counter is increased by 1.
+				When it reaches 0, the server updates game status to \emph{START} and all client (who previously set a listener on it), will move from prepare activity to game activity.
+				
+				\paragraph{timer - line~\ref{firebase:game:timer}}
+				Used during \emph{START}, is the moment in which the currently active timer will expire. It's updated by the server service account each time a timer expires and a new one is set and read by all client devices to synchronize with the game workflow.
+				
+				\paragraph{turn - line~\ref{firebase:game:turn}}
+				Used during \emph{START}, is the turn counter. Considering the game structure, which can potentially go on forever until a team wins, this could seem useless, but to avoid exactly this scenario one objective has been designed to cut the game after 7-8 turns.
+				This countermeasure has been taken to address multiple constraints, mainly battery drain, game pressure and players concentration.
+				
+				\subparagraph{battery drain}
+				Mobile games always find a fierce opponent in battery drain, just by considering that the screen must always be on while playing.
+				In this case, the problem is even more accentuated, given that the game requires not only the screen to be turned on, but also GPS, internet connection and, while in augmented reality mode, even the camera steadily capturing and processing images.
+				A single turn is composed by 20 minutes, asking the battery to support all this consumption for a total of 140-160 minutes by his own is pretty unrealistic, unless all players got an high end smart-phone.
+				Another way to address this problem could be to give each player a power bank and USB cable, which will be a fall-back in case 7 turns will prove themselves to be too short for other teams to compete.
+				
+				\subparagraph{game pressure}
+				Most games are played to relieve stress. This is not the case. In fact, this game can be considered like a competitive game and the pressure over players must stay high during all the match. Removing the turn limit could lead some people to relax and not taking the game seriously, ruining the game both for their opponents and team-mates.
+				Unlimited play time also let the user correct their mistakes, because a strategy defect in a turn can be fixed during the following 3-4 turns while keeping on with the team objective: this again make the game longer and does not punish enough who made a mistake, leading to a game where taking a risk has low to zero consequences.
+				There will be plenty of time to relax before and after the game, but \emph{during} the game, pressure must stay high.
+				
+				\subparagraph{players concentration}
+				As a student and worker, I know that human concentration has limits. The game structure based on 5 minutes of decision making followed by 15 of running around and doing stuff has been thought taking this into consideration, but it's impossible to stay steadily concentrated on something for more than two hours.
+				To ensure players fun, the game must be as short as possible, or they will quickly get bored.
+				
+				
+				\paragraph{event - line~\ref{firebase:game:event}}
+				Used during \emph{START}, keeps track of the random events probability and of which didn't happened yet (every event may take place only one time). This info could be, and actually is, stored directly in the server, but it's copied and kept up-to-date also on Firebase in order to prevent data loss upon server crash. Moreover, putting it here, we can let the players know which events can still happen.
+			
+			\subsubsection{Team}
+			
+			\subsubsection{Unit}
+			
+			\subsubsection{Zone}
+		
+		\subsection{Java/Android}
+		
+			\subsubsection{Game}
+		
+			\subsubsection{Team}
+			
+			\subsubsection{Unit}
+			
+			\subsubsection{Zone}
+			
+			\subsubsection{Board}
+			
+			\subsubsection{Building}
+			
+			\subsubsection{Objective}
+			
+			\subsubsection{Role}
+			
+			\subsubsection{Action}
+			
+	\section{App workflow}
 	
-		CODE CLASS DESCRIPTION
+		% TODO app workflow image
+	
+	\section{Main technological issues}
+		
+		While working on the project, I had to decide how to address particular problems, which resulted in some complex piece of code.
+		Hopefully, the explanation about how I managed to overcome them will be helpful for someone who'll need to follow this same path.
+		
+		\subsection{Board generation}\label{focus:board}
+		
+			During the process of rules adaptation from the reference board-game to the app, the definition on how the board should have been as seen in \autoref{design:board}, occupied some time.
+			
+			The initial idea was to obtain a randomly generated, asymmetric board contained in an irregular polygon defined by the event organizers.
+			In this way, the playing ground could have been set to fit into different real-world city-related shapes (in Reggio Emilia case, the irregular hexagon made by the beltway was the most obvious shape to use).
+			In addition, a randomly generated board would have prevented teams to study strategies based on the already known map and would have forced them to improvise a new strategy while studying the map in \emph{PREPARE}.
+			
+			Unluckily, this kind of board generation almost immediately looked too advanced to be realized in the short time available, so I settled to a more simple regular shape formed starting by a given centre and a radius.
+			
+			The more simple and regular polygon that could be used was of course a circle, and that was my choice until I had to deal with Google Maps management of polygons. Circular shape was perfect for the board perimeter by himself, but I also needed the zones perimeter for in-game mechanics (check in which zone each unit is, manage zone crossing, random point generator inside a given zone, etc) and this was impossible to archive using the build-in circular shape of Maps API.
+			The second thought was to replicate the external circular shape with polygons with a lot of points, but that would have leaded to possible performance issues.
+			In the end, as seen in the board image in \autoref{design:board}, I decided to stick to a particular shape where the central zone is composed by 8 sides (one vertex every 45 degrees), four more zones are contained between the first zone perimeter and a ring composed by 16 sides (one vertex every 22.5 degrees) and last 4 zones are contained between the first ring and a second ring composed by 24 sides (one every 15 degrees).
+			Zones between the second ring and the first one are shifted by 45 degrees because we wanted every zone to touch at least other 4.
+			
+			The fastest way to obtain all zones vertex, possibly also the simplest way apart from hard-coding the GPS positions of all zones, was to directly calculate the perimeter of every ring (the two mentioned earlier plus the central zone perimeter), putting all vertex in a multidimensional and ordered array representing zones perimeters.
+			This is possible thanks to the fact that zones are all adjacent, which means that many vertex are in common with multiple zones, it's only necessary to put them in the right order.
+			
+			At code level, this is achieved with three \lstinline|for| loops pretty similar one to the other, which lead me to think that it could be optimized even further by using polar coordinates, but the code is already complex as it is and for now the result is acceptable.
+			The first and last loops calculate vertexes clockwise, but the middle loop must do it anti-clockwise; this is done because having alternately spinning loops makes much simpler to save vertex of all zones already ordered and get a closed shape for the polygons, as seen in \autoref{board:alternate}.
+			
+			% ADD IMAGE OF why we calculate the vertex like this
+			
+			Inside this loops, all points are obtained by starting from the board centre and calculating the new point based on the radius of the given ring and the offset angle which change at every iteration.
+			
+			\lstinputlisting[caption={Utility method to get new GPS position starting from a given point, a distance (in this case the ring radius) and an angle},
+							firstline=158,
+							lastline=172]{main/listings/boardfactory.java}
+			
+			It has to be noted that the board perimeter is not saved anywhere: only zones polygon are stored and printed upon the Google Map, for various reasons.
+			First of all, we must be able to click on zones polygons on the map for some in-game mechanics (getting zone info like which teams owns his power-up or how many other units are present in the zone), so we have to save them anyway.
+			Secondarily, the only reason for which we need the board perimeter is to check if someone exits it, but we can achieve the same information by checking if a position is inside any of the zones we saved: if it's not, the unit exited the board.
+			
+			% INSERT SCREENS OF WRONG PERIMETER
+			
+			After some trial and error (\autoref{board:mess},  \autoref{board:dimensions}), I managed to obtain the right shape, but the radius I used to calculate the rings was obviously wrong.
+			Considering I wanted the zone to have the same area, I asked a friend of mine to run an R script to find which radius every ring must have in order to achieve it. Obviously the R script assumed the rings as circles, not as the weird shapes they actually are.
+			
+			After loops finish their run, the multidimensional array is used to fill in the perimeter ArrayList of every zone on the board.
+			
+			The last part of the board fabrication is to make all zones aware of their neighbours. Unluckily, I could not think of a way to achieve this other than hard-coding it, and for now the map is simple enough to allow for this.
+			
+		\subsection{Timer mechanism}\label{focus:timer}
+		
+			Synchronizing phases between server and clients is pretty easy with Firebase: taken that the server manages phase timers by his own without crashing and updates accordingly the phase field on game branch, the devices have just to set a listener on it in order to know in which phase the game is.
+			The task between less trivial when you add the fact that all device must have a synchronized countdown of the current phase.
+			
+			The first idea is indeed to store, together with the current phase, also the timer duration.
+			In this way, every device connected could just set an internal timer, nearly synchronized with the one on the server and the problem is solved.
+			
+			But let's go further: what if the devices must be able to connect/disconnect at will and still have the synchronized countdown feature?
+			The must obvious idea will be to add another field, perhaps the moment in which the timer has started, together with his duration.
+			
+			To spare a field (which, in Firebase, usually means sparing an asynchronous listener and a lot of trouble), my solution was to store, instead of starting time and duration, directly the expiration moment of the timer.
+			For this to work, the time on every device and on the server must be the same. This is usually automatically managed by the operating system which uses internet to synchronize himself to the right time and can be takes as assured on the server machine, but on players smart-phones I have no control on the actual internal time of the device, which open the gates to possible glitches and cheats.
+			
+			Luckily Firebase comes to assist us on this as well: listening to the particular path \lstinline|.info|, a number of miscellaneous and useful piece of data can be accessed, one of them being the time offset between the local device and the Firebase server local time.
+			
+			Listening to \lstinline|.info/serverTimeOffset| value change allow us to detect the current offset from the server, store it and add it to the countdown timer that display the remaining time at every timer field change or device connection.
+			
+			To prevent every possible exploit, every time the timer field is changed on Firebase by the server, the local timer on every device is cancelled (if it was not expired yet), his onFinish callback executed and the new timer is set up.
+		
+		\subsection{Match logging}\label{focus:log}
+		
+			In order to better study the game mechanics effectiveness, it's useful to be able to replay all matches, which can used also in detecting possible cheaters or problems.
+			
+			For this, I set up a logging system which keeps track of all units' actions, as well as their movements, and various in-game events.
+			
+			The \lstinline|GameLogger| class is a singleton which statically provides a logger which writes to a file in the "/log" path, appending the creation timestamp to the log file name to log multiple game sessions.
+			
+			All server model classes implements the FirebaseSync interface, which ask to override the \lstinline|sync()| method.
+			In this method, called at the end of the constructor, all listeners to useful info from Firebase are set.
+			In this way, all instances will auto-update themselves listening for changes on Firebase and while doing so, they'll also log all the meaningful actions and events which are taking place during the match.
+			
+			After the game is completed, the structured log file will be set as input of an ad-hoc decoder which can then show a timeline from it, reproducing the events like a video.
+			
+			This ad-hoc decoder has not been developed yet, but it shouldn't be hard to implement. 
+		
+		\subsection{Random picker}\label{focus:picker}
+		
+			\lstinputlisting[caption=Random picker]{main/listings/randompicker.java}
+			
+			A small but useful function which is missing from Java \lstinline|List| interfaces is the possibility to extract a random object from a given list.
+			This may seem not useful, but nearly each game may need some kind of random extraction and also in other contexts (eg. testing purposes) a small function like this can come handy.
+			
+			In this project I made large use of randomly assigned values, eg. objectives distribution to teams, and a lot of parts I had not time to finish will heavily relies on random generation and extraction.
+			
+			For this reasons I created a small utility class to extract random values from a given list, composed by two methods:
+			\begin{description}
+				\item[pick] take the random seed of this thread, then randomly pick an integer value between 0 and the list size -1 and return the list element associated to that value. 
+				\item[extract] same as pick method, but remove the extracted object from the list.
+			\end{description}
+		
+			The picker uses \lstinline|ThreadLocalRandom| class instead of the more known \lstinline|Random| because, relying on asynchronous callbacks and on multi-threading, the synchronized access overhead to the process-global class could decrease performance a little.
+			Plus, it's the recommended class to use, as written in Java 8 docs.
+						
+		\subsection{Random point generation}\label{focus:point}
+		
+		\subsection{Zone control manager}\label{focus:zone}
+		
+		\subsection{Presence system}\label{focus:presence}
+		
+		\subsection{Login system}\label{focus:splash}
+		
+		\subsection{Navigation drawer template}\label{focus:drawer}
+		
+		\subsection{AR on map}\label{focus:map}
+		
+			\subsubsection{Location sniffer}
+			
+			\subsubsection{Visibility rules}
+			
+			\subsubsection{Player tracking}
+		
+		\subsection{AR on camera}
+			
+			\subsubsection{Player tracking}
+			
+			\subsubsection{AR interactions}
