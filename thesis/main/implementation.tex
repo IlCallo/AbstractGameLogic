@@ -268,9 +268,7 @@
 			
 			Inside this loops, all points are obtained by starting from the board centre and calculating the new point based on the radius of the given ring and the offset angle which change at every iteration.
 			
-			\lstinputlisting[caption={Utility method to get new GPS position starting from a given point, a distance (in this case the ring radius) and an angle},
-							firstline=158,
-							lastline=172]{main/listings/boardfactory.java}
+			\lstinputlisting[caption={Utility method, get new GPS position from given point, distance (ring radius) and angle}, firstline=158, lastline=171]{main/listings/boardfactory.java}
 			
 			It has to be noted that the board perimeter is not saved anywhere: only zones polygon are stored and printed upon the Google Map, for various reasons.
 			First of all, we must be able to click on zones polygons on the map for some in-game mechanics (getting zone info like which teams owns his power-up or how many other units are present in the zone), so we have to save them anyway.
@@ -323,7 +321,8 @@
 		
 		\subsection{Random picker}\label{focus:picker}
 		
-			\lstinputlisting[caption=Random picker]{main/listings/randompicker.java}
+			\lstinputlisting[caption=Random picker class]
+							{main/listings/randompicker.java}
 			
 			A small but useful function which is missing from Java \lstinline|List| interfaces is the possibility to extract a random object from a given list.
 			This may seem not useful, but nearly each game may need some kind of random extraction and also in other contexts (eg. testing purposes) a small function like this can come handy.
@@ -336,14 +335,33 @@
 				\item[extract] same as pick method, but remove the extracted object from the list.
 			\end{description}
 		
-			The picker uses \lstinline|ThreadLocalRandom| class instead of the more known \lstinline|Random| because, relying on asynchronous callbacks and on multi-threading, the synchronized access overhead to the process-global class could decrease performance a little.
+			The picker uses \lstinline|ThreadLocalRandom| class instead of the more known \lstinline|Random| because, relying on asynchronous callbacks and on multi-threading, the synchronized access overhead to the process-global class may decrease performance a little.
 			Plus, it's the recommended class to use, as written in Java 8 docs.
 						
 		\subsection{Random point generation}\label{focus:point}
 		
+			\lstinputlisting[caption=Random point generator class]
+							{main/listings/randompoint.java}
+			
+			To implement most of the AR interaction, it's needed a way to generate random points, usually inside a given perimeter (specifically, inside a zone).
+			
+			Generating coins inside every zone for the collectors, drawing a path composed by random points to calm a zone or make it chaotic and other actions, relies on this function.
+			
+			On Android, it's easy to get the previously saved Polygon of a zone and generate a point within it's bounds, checking later if the point is actually inside it's shape\footnote{Let's remember that a Polygon shape and its bounds are not the same thing: the shape can be irregular, while it's bounds are the smallest rectangle around the shape which contains all its points} with Google Maps PolyUtils support library, but on the server we do not have such a powerful tool.
+			
+			The \lstinline|RandomPoint| class has been written to address this deficiency.
+			
+			Given as input a generic perimeter (this can also be the board itself or an area around a given player), the method will generate a \lstinline|Path2D| region from it, because we need the \lstinline|Path2D.contains(x,y)| method.
+			
+			Then it will get the region bounds and keep selecting a random point inside that rectangle until the point we got is actually contained inside the given region.
+			
+			Once it found an acceptable point, it returns it wrapped in a \lstinline|GeoLocation| object.
+		
 		\subsection{Zone control manager}\label{focus:zone}
 		
 		\subsection{Presence system}\label{focus:presence}
+		
+			
 		
 		\subsection{Login system}\label{focus:splash}
 		

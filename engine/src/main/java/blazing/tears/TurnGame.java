@@ -11,14 +11,13 @@ import blazing.tears.role.RoleProvider;
 import blazing.tears.utils.BoardFactory;
 import blazing.tears.utils.DatabaseInitializer;
 import blazing.tears.utils.RandomPicker;
+import blazing.tears.utils.RandomPoint;
 import blazing.tears.zone.*;
 import com.firebase.geofire.GeoLocation;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.*;
 
-import java.awt.*;
-import java.awt.geom.Path2D;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -354,7 +353,8 @@ public class TurnGame implements Runnable {
                                         //TODO set the starting zone as position
                                         //mRef.child("unit/" + unitId + "/lastPosition").setValue(startZone.getCenter());
                                         //TODO randomly set a position directly in the starting zone
-                                        mRef.child("unit/" + unitId + "/lastPosition").setValue(generatePoint(startZone.getPerimeter()));
+                                        mRef.child("unit/" + unitId + "/lastPosition").setValue(
+                                                RandomPoint.generate(startZone.getPerimeter()));
                                         mRef.child("zone/" + startZone.getId() + "/units/" + unitId).setValue(true);
 
                                         // Add the unit to the team members
@@ -620,24 +620,5 @@ public class TurnGame implements Runnable {
     }
 
     private void turn() {
-    }
-
-    private GeoLocation generatePoint(ArrayList<GeoLocation> perimeter) {
-        Path2D region = new Path2D.Double();
-
-        region.moveTo(perimeter.get(0).latitude, perimeter.get(0).longitude);
-        for (int idx = 1; idx < perimeter.size(); idx++)
-            region.lineTo(perimeter.get(idx).latitude,
-                    perimeter.get(idx).longitude);
-        region.closePath();
-
-        Rectangle r = region.getBounds();
-        double x, y;
-        do {
-            x = r.getX() + r.getWidth() * Math.random();
-            y = r.getY() + r.getHeight() * Math.random();
-        } while (!region.contains(x, y));
-
-        return new GeoLocation(x, y);
     }
 }
