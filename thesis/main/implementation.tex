@@ -146,8 +146,10 @@
 			Considering that some lines are pretty much the same over various rule definitions, some kind of legend can be useful to cover the more common ones.
 			
 			\begin{itemize}
+				\item \lstinline|".write" : false| \\ when no \lstinline|.write| rule is defined, it's is assumed to be this one for that level, because \lstinline|.write| rule default to \lstinline|false| when not specified;
 				\item \lstinline|".validate" : "newData.hasChildren(['field1', 'field2', ...])"]| \\ if this branch is defined, then the specified fields must be present defined as well;
-				\item \lstinline|["$other" : { ".validate" : false }]| \\ any field different from the ones specified cannot be defined;
+				\item \lstinline|"$var" : { ... }| \\ a wild-card which goes one level deeper in the branch, while keeping a reference to the key in which we are in, which can be used as a variable inside that scope rules. For example, in a branch \lstinline|dinosaur| with a collection of dinosaurs by name, the \lstinline|$dino| will contain the name of the dinosaur in which branch we are in;
+				\item \lstinline|{ ..., ..., "$other" : { ".validate" : false } }| \\ any field different from the ones specified cannot be defined.
 			\end{itemize}
 			
 			Firebase model is obviously simpler and looser than it's Java counterpart and has at top level only four branches.
@@ -157,10 +159,10 @@
 			
 				\lstinputlisting[caption=Game branch rules,
 								firstline=3,
-								lastline=65]{main/listings/firebase.json}
+								lastline=63]{main/listings/firebase.json}
 				
 				All data needed to manage a game instance is contained here.
-				Everybody can read at this location, but no one (except the server service account) has write permission, as shown at line~\ref{firebase:game:read} and~\ref{firebase:game:write}.
+				Everybody can read at this location, but no one (except the server service account) has write permission, as shown by line~\ref{firebase:game:read} and the absence of the \lstinline|.write|.
 				
 				\paragraph{status - line~\ref{firebase:game:status}}
 				Represent the status in which the game can be, as seen in \autoref{workflow:general}, plus \emph{PAUSE} and \emph{RESUME}.
@@ -210,9 +212,148 @@
 			
 			\subsubsection{Team}
 			
+				\lstinputlisting[caption=Team branch rules,
+								firstline=65,
+								lastline=126]{main/listings/firebase.json}
+				
+				Information about teams are stored here.
+				Everybody can read at this location, but no one (except the server service account) has write permission, as shown by line~\ref{firebase:team:read} and the absence of the \lstinline|.write|.
+				The \lstinline|.read| command had to be moved out of the single team scope, otherwise units would be able to read every single team branch, but not the whole list. 
+			
+			
+				\paragraph{color - line~\ref{firebase:team:color}}
+				The color associated with this team. Considering that a visual representation is needed in order to display differentiate units on the board (both in the map and in the AR part), a random color chosen between the predefined ones is assigned to every team during the team registration. This color will be used every time there will be the necessity to show that an unit is of a particular team or to show the team generic information.
+				It's stored like a color name, instead of an hex code, in order to directly use the \lstinline|Color.valueOf(name)| method present on Android (otherwise we would have to use the \lstinline|ResourceCompat| support class to get it and would have been resulted in less human-readable code); this could be changed if a more specific color selection is needed.
+			
+				\paragraph{name - line~\ref{firebase:team:name}}
+				Specified during the team registration, it will be displayed to identify the team when required.
+			
+				\paragraph{members - line~\ref{firebase:team:members}}
+				All members of the team are listed within this branch, with the units key as the sub-branch key and \lstinline|true| value. This is an easy way to access the information from validation rules of other fields: checking if the branch \lstinline|team/<team_id>/members/<unit_id>| exists is the easier way to know if an unit is a member of a particular team.
+			
+				\paragraph{money - line~\ref{firebase:team:money}}
+				Money reserve of the team. Both \lstinline|loan| and \lstinline|maximum| fields must always be set. At the start of the game \lstinline|loan| is initialized to 0 and \lstinline|maximum| to 10 coins.
+				The money management works as explained in \autoref{nolead:money}.
+				
+				\lstinline|maximum| decreases accordingly to the loan given in \emph{MONEY} phase, so players from other teams can check how much coins have been given to units comparing the reserve before and after that phase, and increases again during the \emph{CONTROL} phase in which money from every unit gets back to the team reserve.
+				When assassins demolish building of this team, half the price paid to construct it is refunded and therefore added to this field.
+				
+				\lstinline|loan|, instead, keeps track of the loan requested during \emph{MONEY} phase and must be comprised between 0 and the maximum money in the reserve. This is one of the few fields which are modifiable by units inside the team branch, but can be touched only by team members.
+				
+				\paragraph{roles - line~\ref{firebase:team:roles}}
+				Role pool data. Both \lstinline|current| and \lstinline|maximum| fields must always be set. At the start of the game both \lstinline|maximum| and \lstinline|current| fields are set to the initial role poo: 2 cops, 2 assassins, 2 builders, 999 collectors, 0 untouchable and 0 multitasking.
+				The role management works as explained in \autoref{nolead:role}.
+				
+				\lstinline|maximum| field is updated at the end of \emph{CONTROL} phase of every turn, after taking into account possible random events and zones power-up.
+				
+				At the very beginning of the \emph{ROLE} phase, \lstinline|current| child values are reset to be equal to the \lstinline|maximum| ones, then they're updated every time a unit choose his role or change his already chosen role. In this way, other units can easily see which roles are still available for them to choose.
+				Those values cannot ever be negative and can be at least as much as their counterparts in \lstinline|maximum| field.
+				This is one of the few fields which are modifiable by units inside the team branch, but can be touched only by team members.
+			
 			\subsubsection{Unit}
 			
+				\lstinputlisting[caption=Unit branch rules,
+								firstline=128,
+								lastline=189]{main/listings/firebase.json}
+			
+				Information about units are stored here.
+				Everybody can read at this location, but only the unit itself (and the server service account) has write permission, as shown by line~\ref{firebase:unit:read} and~\ref{firebase:unit:write}.
+				The \lstinline|.read| command had to be moved out of the single unit scope, otherwise other units would be able to read every single unit branch, but not the whole list.
+			
+				\paragraph{username - line~\ref{firebase:unit:username}}
+				Unit username, as inserted during the registration. It's used to identify the unit in many different scenarios: on the map fragment, in AR activity, in the team management fragment, etc. Not to be confused with the email, needed for the login and saved together with the password in the Firebase Auth system.
+			
+				\paragraph{team - line~\ref{firebase:unit:team}}
+				Team identifier of which this unit is member. It's a redundancy, we could check every team if this user is present in the \lstinline|members|) field, but in Firebase this is normal, considering the difficulty and limitation in query system.
+				It's validated to be sure that the inserted identifier actually reference an existing team.
+			
+				\paragraph{lastOnline - line~\ref{firebase:unit:online}}
+				If the unit is not currently on-line (see \autoref{model:presence}), this value represent the last moment in which he was seen on-line. This is used mostly by the game logger (\autoref{focus:log}) or to display how much time passed since a unit accessed the application. It's updated when the unit disconnect from the system, as explained in \autoref{focus:presence}.
+				
+				\paragraph{lastPosition - line~\ref{firebase:unit:lastpos}}
+				The last GPS position in which the unit was seen. AR parts of the project are based on this field (and it's updates from all units) to show where other units are.
+			
+				\paragraph{zone - line~\ref{firebase:unit:zone}}
+				The last zone in which the unit was seen. It's updated when the unit move out of his previous zone for at least 10 meters. This field is the main component of the visibility rule system used on the map, as described in \autoref{focus:map:visibility}. Can assume value from 0 to 9, where 0 means that the unit is currently out of the board, while values from 1 to 9 represent the zones with that number as key.
+				
+				\paragraph{startPosition - line~\ref{firebase:unit:startpos}}
+				Used in \emph{PREPARE}, is the GPS position of the starting point of the unit. It's set in \emph{INITIALIZE} where units are equally distributed on 3 randomly chosen starting zones, and correspond to the zone centroid.
+				When the user reach his starting point, it's asked to stay near it until all other units has reached theirs. They can move as far as 20 meters from it, if they go further, the application will notice and ask them to return to the starting point.
+				
+				\paragraph{ready - line~\ref{firebase:unit:ready}}
+				Used in \emph{PREPARE}, record if the unit reached or not the starting point. Based on this, field we are able to distinguish from a unit which arrived to the starting point and then moved slightly away and someone which arrived near the starting point but never reached it for real, still resulting not ready to start the game. Every time a new unit set this field value to \lstinline|true|, he will also decrease by one the \lstinline|unitsToWait| field on the game branch.
+				If the unit moves too far away from the starting point, the value is reset to \lstinline|false| and \lstinline|unitsToWait| will be increased by 1. 
+				
+				\paragraph{role - line~\ref{firebase:unit:role}}
+				Used in \emph{START}, represent the current role of this unit. By default it's set as \emph{UNSPECIFIED}, value to which is reset at every \emph{CONTROL} phase.
+				During \emph{ROLE} phase, may change several time while team members decide who'll take which role, then it cannot be modified until next \emph{ROLE} phase.
+				The chosen role also impact on the actions which can be selected by this unit in the subsequent phase, \emph{ACTION} one.
+				This field is one cornerstone of the game, because greatly influence visibility rules and interactions between units.
+				
+				\paragraph{action - line~\ref{firebase:unit:action}}
+				Used in \emph{START}, stores the chosen action. It's updated in \emph{ACTION} phase and, while not influencing the visibility rules like the \lstinline|role| field, defines at a more fine level the interaction with other units. Usually every role grant access to the choice between 2 actions, except from the \emph{COLLECTOR} role which grant just one action. Using the \emph{MULTITASKING} power-up it's possible to select both the actions provided with every role, but this features has not been modelled yet, even if it will probably lead to changing the \emph{action} field from a \emph{String} to a \emph{List}.
+				
+				\paragraph{money - line~\ref{firebase:unit:money}}
+				Used in \emph{START}, this field is used, in different phases, to record either the coins the unit ask to borrow from team reserve or the coins he's carrying with him.
+				
+				It's possible to get money in 3 ways:
+				\begin{description}
+					\item[asking a loan] as described in \autoref{nolead:money}, in \emph{MONEY} phase;
+					\item[collecting coins] if the \emph{COLLECTOR} role has been chosen, using AR to find and pick up coins, in \emph{TURN} phase;
+					\item[robbing other units] if the \emph{ASSASSIN} role has been chosen, assassinating someone which was carrying coins, in \emph{TURN} phase.
+				\end{description}
+			
+				Money can be used by builders to construct a building, paying a cost which differs from zone to zone, depending on the power-up usefulness.
+			
 			\subsubsection{Zone}
+			
+			\lstinputlisting[caption=Zone branch rules,
+							firstline=191,
+							lastline=274]{main/listings/firebase.json}
+							
+			Information about board zones are stored here.
+			Everybody can read at this location, but no one (except from the server service account) has write permission, as shown by line~\ref{firebase:zone:read} and the absence of the \lstinline|.write|.
+			The \lstinline|.read| command had to be moved out of the single zone scope, otherwise other units would be able to read every single zone branch, but not the whole list.
+			It must be noted that zone identifier must be an integer between 0 and 9, in order to make the \lstinline|near| field work correctly.
+			
+			\paragraph{description - line~\ref{firebase:zone:description}}
+			Zone description, which is usually related to the power-up effect.
+			
+			\paragraph{cost - line~\ref{firebase:zone:cost}}
+			Coins which must be paid to construct a building on this zone. To be able to do so, builders must carry with them at least this amount of coins. Upon a building demolition, half the cost is refunded to the owner team. Upon constructing a building, instead, the team gain the zone power-up, taking it from the previous possessor, if any.
+			
+			\paragraph{center - line~\ref{firebase:zone:center}}
+			GPS position of the centre of this zone. It's used in \emph{PREPARE} as starting point for units.
+			
+			\paragraph{perimeter - line~\ref{firebase:zone:perimeter}}
+			Collection of GPS position of all vertex composing the zone perimeter. It's set for the first and only time in \emph{INITIALIZE} and used to print the game board on the map and to check if a unit is in this zone or not. It's important to note that vertexes must be ordered, otherwise the perimeter would result in no more than a scribble on the map.
+			
+			\paragraph{near - line~\ref{firebase:zone:near}}
+			Collection of zones near to this one, needed to execute some power-up effects.
+			The added values are checked to be actually reference to other zones.
+			
+			\paragraph{chaotic - line~\ref{firebase:zone:chaotic}}
+			The status of this zone: \lstinline|true| if chaotic, \lstinline|false| if calm. Builders cannot construct in a chaotic zone, while assassins cannot assassinate units in a calm zone. This field can be updated only by the units which chose \emph{CALM} or \emph{PANIC} actions in this turn.
+			
+			\paragraph{controller - line~\ref{firebase:zone:controller}}
+			Team which holds control on this zone. The control mechanic is needed for an objective, which requires to gain control of 4 zones to win the game. A team is called "controller" of a zone if the sum of his buildings and units in that zone is higher than the one of every other team in game. This mechanic is better explained in \autoref{focus:control}.
+			
+			\paragraph{units - line~\ref{firebase:zone:units}}
+			List of units currently in this zone, it's used to check which teams control this zone and only the unit itself can add/remove his child branch at this path. Of course, the it must be a valid and authenticated unit.
+			
+			\paragraph{buildings - line~\ref{firebase:zone:buildings}}
+			List of buildings constructed in this zone. Every building must have a \lstinline|owner| field which stores his owner team id. Only units which chose \emph{BUILD} or \emph{DEMOLISH} action for this turn can update data at this location (constructing or demolishing a building).
+			
+			\subsubsection{Presence}\label{model:presence}
+		
+				\lstinputlisting[caption=Presence branch rules,
+								firstline=276,
+								lastline=288]{main/listings/firebase.json}
+								
+				This branch support the presence management system, which will be discussed in more detail in \autoref{focus:presence}.
+				Everybody can read at this location, every unit can write here as well, but only in the sub-branch based on their id, as shown by line~\ref{firebase:presence:read} and~\ref{firebase:presence:write}.
+				The \lstinline|.read| command had to be moved out of the single unit scope, otherwise other units would be able to read every single unit branch, but not the whole list.
+				The only value which every unit branch can assume is \lstinline|true|, which states that unit is currently on-line. Conversely, if the branch with the given unit id does not exists, the unit is off-line.
 		
 		\subsection{Java/Android}
 		
@@ -357,21 +498,65 @@
 			
 			Once it found an acceptable point, it returns it wrapped in a \lstinline|GeoLocation| object.
 		
-		\subsection{Zone control manager}\label{focus:zone}
+		\subsection{Zone control manager}\label{focus:control}
+		
+			The \lstinline|ControlObjective| need a special mechanic to understand which team currently controls a given zone.
+			A zone is controlled by a team if the sum of its buildings and units there are greater than the one of every other team.
+			If two or more teams have equal sum, nobody controls the zone.
+			In the Firebase data model, the controller team is specified in the \lstinline|controller| field, which is updated by the server.
+			In fact, every time a unit change zone or a building is constructed/demolished the server replicate the update on the selected zone instance using the \lstinline|addUnit|, \lstinline|removeUnit|, \lstinline|addBuilding|, \lstinline|removeBuilding|.
+			Every one of those methods, after updating their own \lstinline|ArrayList| of units/buildings, calls \lstinline|updateController|.
+			This method, which ask for a team reference and an integer as parameters, update the control \lstinline|HashMap| keeping track of the sum of buildings and units of every team, then search the entry where this value is the maximum.
+			Every time a new maximum is found, its team reference (which is the key of the \lstinline|HashMap| entry) is stored as the controller team, but if a second entry with the same value is found, the controller team is set to null.
+			After cycling all the entries, the controller variable is set to the right team reference (or null if no one controls the zone) and it's accessible with \lstinline|getController| getter.
 		
 		\subsection{Presence system}\label{focus:presence}
-		
+
+			It's important, both for team-mates and enemies to be able to see if a given player in their zone is currently active (eg. is holding his cellphone in his hands doing some actions) or not, maybe because it's moving around.
 			
+			Using Firebase, setting up a presence system trivial, thanks to official guides\cite{firebase:presence} and ah-hoc commands provided by the library.
+			
+			The \lstinline|OnDisconnect| object can be chained with the \lstinline|Query| one to store a particular operation on the server, which will be executed when the connection is interrupted.
+			
+			Considering that the presence system is required in 3 different activities (augmented activity, game activity, preparation activity) I put it in a singleton class, \lstinline|PresenceManager|, which exposes two static methods: \lstinline|PresenceManager.setup(userId)| and \lstinline|PresenceManager.cancel()|.
+		 
+			\paragraph{setup}
+			Initialize the presence manager using the given user id.
+			If the singleton has already been initialized, the user id is checked against the previously saved one: if it's the same, no operation is done  and the presence manager is shared between different activities saving some overhead, otherwise the \lstinline|cancel| method is called and a normal set-up take place.
+			If instead it's the first initialization, the user id and some disconnection listener references are stored internally, then a value listener on the particular location \lstinline|.info/connected| is added: like many informations on the special \lstinline|.info| branch, this value is updated directly by Firebase, in this case every time the client's connection state changes.
+			As soon as the \lstinline|.info/connected| callback is fired with value \lstinline|true|, a new branch with the user id as key is pushed into the \lstinline|presence| branch (see \autoref{model:presence}) and two operation are stored on the server to be executed upon disconnect event: the first one remove the value from the \lstinline|presence| branch, while second updates the \lstinline|lastOnline| value inside the user personal branch.
+			In this way, it's easy to check which users are currently connected reading  \lstinline|presence| branch children, and it's easy as well checking the last moment in which a particular user disconnected.
+			
+			\paragraph{cancel}
+			If the singleton has actually been initialized, reset the presence manager removing all value and disconnect listeners.
 		
 		\subsection{Login system}\label{focus:splash}
 		
 		\subsection{Navigation drawer template}\label{focus:drawer}
 		
+			Even if the final version of the app does not include a navigation drawer, upon past projects I was amazed about not finding a simple yet flexible implementation of it which could be applied smoothly to multiple activities.
+			Moreover, I needed to produce some kind of template that could avoid me to rewrite the common frame for all activities (coordinator layout and his behaviour, action bar, information bar, navigation drawer).
+			
+			All guides I found were based upon defining every single activity as implementing the navigation drawer interface.
+			A more advanced idea was to define an abstract class which extended the activity class and implemented the navigation drawer interface, making all activities extend it.
+			In this scenario, the activity have to call an initializer method in his \lstinline|onCreate|, which could lead to oversights and errors difficult to track down. Moreover, the \lstinline|setContentView| is still delegated to the activity, meaning that its XML layout code is still the product of a copy/paste of all navigation drawer views between an activity's layout file and another.
+			
+			The solution I developed is still sort-of based on this idea, but is more general: the \lstinline|NavActivity| abstract class load an XML layout with the navigation drawer feature, which in turn include a second XML layout with all other frame components.
+			This division let the developer see in Android Studio preview how the graphics will be both with the open navigation drawer and the closed one.
+			\lstinline|NavActivity| takes care of the common operations to every activity, mostly initialization and management of action bar, information bar and navigation drawer.
+			The XML template layout is a \lstinline|CoordinatorLayout| whose children are the an \lstinline|AppBarLayout|, a \lstinline|FrameLayout| and a toolbar which act as information bar.
+			The \lstinline|FrameLayout| is a place-holder, it is set as content view and sub-sequentially the particular activity layout is inflated inside it.
+			
+			To know which layout we have to inflate into the template, an abstract method called \lstinline|getContentLayoutId| is defined.
+			All activities extending \lstinline|NavActivity| are forced to implement this method which must return the id of the layout to be inflated, this avoid possible oversights.
+			
+			This system also reduce code redundancy and copy/paste actions to zero, removing one of the major problems generator while coding in general.
+		
 		\subsection{AR on map}\label{focus:map}
 		
 			\subsubsection{Location sniffer}
 			
-			\subsubsection{Visibility rules}
+			\subsubsection{Visibility rules} \label{focus:map:visibility}
 			
 			\subsubsection{Player tracking}
 		
