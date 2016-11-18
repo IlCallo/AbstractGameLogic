@@ -264,18 +264,19 @@ public class TurnGame implements Runnable {
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         for (BaseZone z : zones) {
                             MutableData localMutableData = mutableData.child(Integer.toString(z.getId()));
-                            localMutableData.child("cost").setValue(z.getCost());
                             localMutableData.child("description").setValue(z.getDescription());
-                            localMutableData.child("chaotic").setValue(false);
+                            localMutableData.child("cost").setValue(z.getCost());
                             localMutableData.child("center").setValue(z.getCenter());
+
+                            for (int i = 0; i < z.getPerimeter().size(); i++) {
+                                localMutableData.child("perimeter/" + i).setValue(z.getPerimeter().get(i));
+                            }
 
                             for (BaseZone z1 : z.getNearZones()) {
                                 localMutableData.child("near/" + z1.getId()).setValue(true);
                             }
 
-                            for (int i = 0; i < z.getPerimeter().size(); i++) {
-                                localMutableData.child("perimeter/" + i).setValue(z.getPerimeter().get(i));
-                            }
+                            localMutableData.child("chaotic").setValue(false);
                         }
 
                         return Transaction.success(mutableData);
@@ -389,14 +390,13 @@ public class TurnGame implements Runnable {
 
                                     // Set initial money
                                     team.earnMoney(INITIAL_MONEY);
-                                    mRef.child("team/" + team.getId() + "/money").setValue(INITIAL_MONEY);
-
-                                    // Set loanRequest to 0
-                                    mRef.child("team/" + team.getId() + "/loanRequest").setValue(0);
+                                    mRef.child("team/" + team.getId() + "/money/maximum").setValue(INITIAL_MONEY);
 
                                     // Set team role pool
                                     for (Map.Entry<Role, Integer> entry : team.getRolePool().entrySet()) {
-                                        mRef.child("team/" + team.getId() + "/roles/" + entry.getKey().name())
+                                        mRef.child("team/" + team.getId() + "/roles/" + entry.getKey().name() + "/maximum")
+                                                .setValue(entry.getValue());
+                                        mRef.child("team/" + team.getId() + "/roles/" + entry.getKey().name() + "/current")
                                                 .setValue(entry.getValue());
                                     }
 

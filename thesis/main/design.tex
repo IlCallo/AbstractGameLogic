@@ -23,12 +23,15 @@
 			Board concept has been retained unchanged from the original game, but instead of a physical one in cardboard, a virtual one is generated on-the-fly starting from given centre and radius.
 			The algorithm currently generate a pseudo-circular board with nine zones displaced in a symmetric way, with a central zone, 4 zones on the inner ring and 4 zones in the outer ring shifted by 45° with respect to the inner one.
 			
-			% ADD BOARD FIGURE
+			\begin{figure}
+				\centering
+				\includegraphics[width=.5\textwidth]{rightboard}
+				\caption{Ideal shape of the board and zones}
+			\end{figure}
 			
 			Zones all have the same area, thanks to a R simulation which calculated the right radius to use for different coordinates rings.
 			Ideally, moving from a zone centre to another zone centre shall take 5 minutes and turn duration is related to this: the players shall make a choice between moving slightly (one zone or even staying in the same zone) and get plenty of time to perform their actions or move a lot (two or three zones) and running out of time to anything.
-			% REVIEW, POWER-UP ARE STILL FIXED
-			Every zone grants a power-up when teams build on them, the building cost is higher the more useful is the power-up and the zones are randomly distributed on the board (eg. the power-up disposition will be unlikely to be repeated in subsequent games).
+			Every zone grants a power-up when teams build on them (higher the building cost, more useful is the power-up) and the zones are randomly distributed on the board (eg. the power-up disposition will be unlikely to be repeated in subsequent games).
 			Power-up activate at the begin of every turn.
 			
 			On a board of 9 zones, power-up are defined as in \autoref{powup:desc}, notice that some of them are referred to the role system, explained in the next subsection.

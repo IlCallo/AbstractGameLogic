@@ -214,7 +214,7 @@
 			
 				\lstinputlisting[caption=Team branch rules,
 								firstline=65,
-								lastline=126]{main/listings/firebase.json}
+								lastline=129]{main/listings/firebase.json}
 				
 				Information about teams are stored here.
 				Everybody can read at this location, but no one (except the server service account) has write permission, as shown by line~\ref{firebase:team:read} and the absence of the \lstinline|.write|.
@@ -227,6 +227,9 @@
 			
 				\paragraph{name - line~\ref{firebase:team:name}}
 				Specified during the team registration, it will be displayed to identify the team when required.
+				
+				\paragraph{objective - line~\ref{firebase:team:objective}}
+				Randomly assigned during the game initialization, describes the victory criteria of the team.
 			
 				\paragraph{members - line~\ref{firebase:team:members}}
 				All members of the team are listed within this branch, with the units key as the sub-branch key and \lstinline|true| value. This is an easy way to access the information from validation rules of other fields: checking if the branch \lstinline|team/<team_id>/members/<unit_id>| exists is the easier way to know if an unit is a member of a particular team.
@@ -253,8 +256,8 @@
 			\subsubsection{Unit}
 			
 				\lstinputlisting[caption=Unit branch rules,
-								firstline=128,
-								lastline=189]{main/listings/firebase.json}
+								firstline=131,
+								lastline=192]{main/listings/firebase.json}
 			
 				Information about units are stored here.
 				Everybody can read at this location, but only the unit itself (and the server service account) has write permission, as shown by line~\ref{firebase:unit:read} and~\ref{firebase:unit:write}.
@@ -307,54 +310,54 @@
 			
 			\subsubsection{Zone}
 			
-			\lstinputlisting[caption=Zone branch rules,
-							firstline=191,
-							lastline=274]{main/listings/firebase.json}
-							
-			Information about board zones are stored here.
-			Everybody can read at this location, but no one (except from the server service account) has write permission, as shown by line~\ref{firebase:zone:read} and the absence of the \lstinline|.write|.
-			The \lstinline|.read| command had to be moved out of the single zone scope, otherwise other units would be able to read every single zone branch, but not the whole list.
-			It must be noted that zone identifier must be an integer between 0 and 9, in order to make the \lstinline|near| field work correctly.
-			
-			\paragraph{description - line~\ref{firebase:zone:description}}
-			Zone description, which is usually related to the power-up effect.
-			
-			\paragraph{cost - line~\ref{firebase:zone:cost}}
-			Coins which must be paid to construct a building on this zone. To be able to do so, builders must carry with them at least this amount of coins. Upon a building demolition, half the cost is refunded to the owner team. Upon constructing a building, instead, the team gain the zone power-up, taking it from the previous possessor, if any.
-			
-			\paragraph{center - line~\ref{firebase:zone:center}}
-			GPS position of the centre of this zone. It's used in \emph{PREPARE} as starting point for units.
-			
-			\paragraph{perimeter - line~\ref{firebase:zone:perimeter}}
-			Collection of GPS position of all vertex composing the zone perimeter. It's set for the first and only time in \emph{INITIALIZE} and used to print the game board on the map and to check if a unit is in this zone or not. It's important to note that vertexes must be ordered, otherwise the perimeter would result in no more than a scribble on the map.
-			
-			\paragraph{near - line~\ref{firebase:zone:near}}
-			Collection of zones near to this one, needed to execute some power-up effects.
-			The added values are checked to be actually reference to other zones.
-			
-			\paragraph{chaotic - line~\ref{firebase:zone:chaotic}}
-			The status of this zone: \lstinline|true| if chaotic, \lstinline|false| if calm. Builders cannot construct in a chaotic zone, while assassins cannot assassinate units in a calm zone. This field can be updated only by the units which chose \emph{CALM} or \emph{PANIC} actions in this turn.
-			
-			\paragraph{controller - line~\ref{firebase:zone:controller}}
-			Team which holds control on this zone. The control mechanic is needed for an objective, which requires to gain control of 4 zones to win the game. A team is called "controller" of a zone if the sum of his buildings and units in that zone is higher than the one of every other team in game. This mechanic is better explained in \autoref{focus:control}.
-			
-			\paragraph{units - line~\ref{firebase:zone:units}}
-			List of units currently in this zone, it's used to check which teams control this zone and only the unit itself can add/remove his child branch at this path. Of course, the it must be a valid and authenticated unit.
-			
-			\paragraph{buildings - line~\ref{firebase:zone:buildings}}
-			List of buildings constructed in this zone. Every building must have a \lstinline|owner| field which stores his owner team id. Only units which chose \emph{BUILD} or \emph{DEMOLISH} action for this turn can update data at this location (constructing or demolishing a building).
+				\lstinputlisting[caption=Zone branch rules,
+								firstline=194,
+								lastline=277]{main/listings/firebase.json}
+								
+				Information about board zones are stored here.
+				Everybody can read at this location, but no one (except from the server service account) has write permission, as shown by line~\ref{firebase:zone:read} and the absence of the \lstinline|.write|.
+				The \lstinline|.read| command had to be moved out of the single zone scope, otherwise other units would be able to read every single zone branch, but not the whole list.
+				It must be noted that zone identifier must be an integer between 0 and 9, in order to make the \lstinline|near| field work correctly.
+				
+				\paragraph{description - line~\ref{firebase:zone:description}}
+				Zone description, which is usually related to the power-up effect.
+				
+				\paragraph{cost - line~\ref{firebase:zone:cost}}
+				Coins which must be paid to construct a building on this zone. To be able to do so, builders must carry with them at least this amount of coins. Upon a building demolition, half the cost is refunded to the owner team. Upon constructing a building, instead, the team gain the zone power-up, taking it from the previous possessor, if any.
+				
+				\paragraph{center - line~\ref{firebase:zone:center}}
+				GPS position of the centre of this zone. It's used in \emph{PREPARE} as starting point for units.
+				
+				\paragraph{perimeter - line~\ref{firebase:zone:perimeter}}
+				Collection of GPS position of all vertex composing the zone perimeter. It's set for the first and only time in \emph{INITIALIZE} and used to print the game board on the map and to check if a unit is in this zone or not. It's important to note that vertexes must be ordered, otherwise the perimeter would result in no more than a scribble on the map.
+				
+				\paragraph{near - line~\ref{firebase:zone:near}}
+				Collection of zones near to this one, needed to execute some power-up effects.
+				The added values are checked to be actually reference to other zones.
+				
+				\paragraph{chaotic - line~\ref{firebase:zone:chaotic}}
+				The status of this zone: \lstinline|true| if chaotic, \lstinline|false| if calm. Builders cannot construct in a chaotic zone, while assassins cannot assassinate units in a calm zone. This field can be updated only by the units which chose \emph{CALM} or \emph{PANIC} actions in this turn.
+				
+				\paragraph{controller - line~\ref{firebase:zone:controller}}
+				Team which holds control on this zone. The control mechanic is needed for an objective, which requires to gain control of 4 zones to win the game. A team is called "controller" of a zone if the sum of his buildings and units in that zone is higher than the one of every other team in game. This mechanic is better explained in \autoref{focus:control}.
+				
+				\paragraph{units - line~\ref{firebase:zone:units}}
+				List of units currently in this zone, it's used to check which teams control this zone and only the unit itself can add/remove his child branch at this path. Of course, the it must be a valid and authenticated unit.
+				
+				\paragraph{buildings - line~\ref{firebase:zone:buildings}}
+				List of buildings constructed in this zone. Every building must have a \lstinline|owner| field which stores his owner team id. Only units which chose \emph{BUILD} or \emph{DEMOLISH} action for this turn can update data at this location (constructing or demolishing a building).
 			
 			\subsubsection{Presence}\label{model:presence}
 		
 				\lstinputlisting[caption=Presence branch rules,
-								firstline=276,
-								lastline=288]{main/listings/firebase.json}
-								
+								firstline=279,
+								lastline=291]{main/listings/firebase.json}
+									
 				This branch support the presence management system, which will be discussed in more detail in \autoref{focus:presence}.
 				Everybody can read at this location, every unit can write here as well, but only in the sub-branch based on their id, as shown by line~\ref{firebase:presence:read} and~\ref{firebase:presence:write}.
 				The \lstinline|.read| command had to be moved out of the single unit scope, otherwise other units would be able to read every single unit branch, but not the whole list.
 				The only value which every unit branch can assume is \lstinline|true|, which states that unit is currently on-line. Conversely, if the branch with the given unit id does not exists, the unit is off-line.
-		
+			
 		\subsection{Java/Android}
 		
 			\subsubsection{Game}
@@ -375,9 +378,65 @@
 			
 			\subsubsection{Action}
 			
-	\section{App workflow}
+	\section{App workflow}\label{app:workflow}
 	
-		% TODO app workflow image
+		\includegraphics[width=\textwidth]{androidflowchart}
+		
+		Together with the game mechanics and rules description, a prototype of the game has been prepared for Android systems and works from API 16 onward.
+			
+		Due to limited time and external job constraints, I wasn't able to finish the prototype, which is currently incomplete in some of his modules: messenger system has not been implemented, the augmented reality part which used the camera (which had been prepared as the first module) has not been properly connected to the prototype and with the action system, status fragment which shows info about other teams has not be implemented, the end game activity has not been implemented (even if it's more or less a copy of the preparation one).
+			
+		Following, a description of the features of every activity and fragment which composes the application.
+		
+		\paragraph{SplashActivity}
+		
+		It's composed by two alternatively layouts, one for login and the other for the loading part.
+		Its main purpose is to perform the user login and pre-load all useful informations for the subsequent activity, which will then start after understanding which status the game has in that moment.
+		Everything it does is described in more details in \autoref{focus:splash}.
+		
+		\paragraph{PreparationActivity}
+		
+		It's composed solely by an instance of the GeoFragment and its main purpose is to guide players to their starting point, forcing them to wait there when they reached it. When everybody is in the right place, it start the following activity: \lstinline|GameActivity|.
+		
+		\paragraph{GameActivity}
+			
+		It's composed solely by a view pager (a group of tabs) which manages various aspects of the game.
+		When a team successfully accomplish his objective, it starts the last activity of the game: \lstinline|EndActivity|.
+		
+			\subparagraph{GeoFragment}
+			
+			It's the more important fragment of the activity, because it let you see the board, where other units are and many informations about the AR layer of the game.
+			At code level, it's a wrapper around a \lstinline|MapFragment| (from Google Maps Android library) which takes care of managing the board with the zones of which it's composed, units position and the related visibility rules, AR objects which spawns around and many others tasks: its working flow is described later in \autoref{focus:map}.
+			
+			\subparagraph{TeamFragment}
+			
+			It's composed by four parts, each visible only during certain phases except the forth one:
+			\begin{description}
+				\item[role management] displays the roles available during the \emph{ROLE} phase and let the unit to select its own;
+				\item[action management] displays the actions available, related to the chosen role, during the \emph{ACTION} phase and let the unit to select its own;
+				\item[money management] shows how many money are present in the team reserve and let unit borrow some of them in the \emph{MONEY} phase;
+				\item[teammates status] a list showing the role, action and borrowed money of every other unit in the team, it's visible in all phases of the game.
+			\end{description}
+			
+			With this components, it manages three out of four phases of which the game is composed.
+			
+			\subparagraph{StatusFragment}
+			
+			It's composed by a general status bar, which show some general info about the game (current turn, how many and which random events are left, etc), and a list of team summary cards, one for each team playing (number of controlled zones, total money in their reserve, etc.).
+			
+			\subparagraph{MessengerFragment}
+			
+			It's similar to every other messenger system (Whatsapp, Allo, Facebook Messenger) and is implemented using the Firebase Cloud Messaging, not needing all the more advanced features (eg. photos and videos).
+		
+		\paragraph{AugmentedActivity}
+		
+		It's a \lstinline|FrameLayout| containing a \lstinline|BeyondarFragmentSupport|, a wrapper of a normal fragment enhanced to display the camera capture as background, and an AR overlay which displays things based on the position of various objects and units.
+		It's work is to allow interaction between units and between units and AR objects, its behaviour is better described in \autoref{focus:augmented}.
+		
+		\paragraph{EndActivity}
+	
+		It's the last activity of the game, and it's composed solely by an instance of the GeoFragment as \lstinline|PreparationActivity|.
+		Its main purpose is to gather players to the end position, where the winner will be awarded. When everybody has reached it, the game is finished and the application force a logout of all players, changing the game status to \emph{INACTIVE}.
 	
 	\section{Main technological issues}
 		
@@ -405,7 +464,11 @@
 			At code level, this is achieved with three \lstinline|for| loops pretty similar one to the other, which lead me to think that it could be optimized even further by using polar coordinates, but the code is already complex as it is and for now the result is acceptable.
 			The first and last loops calculate vertexes clockwise, but the middle loop must do it anti-clockwise; this is done because having alternately spinning loops makes much simpler to save vertex of all zones already ordered and get a closed shape for the polygons, as seen in \autoref{board:alternate}.
 			
-			% ADD IMAGE OF why we calculate the vertex like this
+			\begin{figure}[htp]
+				\centering
+				\includegraphics[width=.5\textwidth]{boardrounds}
+				\caption{Graphical representation of alternate vertex calculation, showing the perimeter of one of the zones of the first ring}\label{board:alternate}
+			\end{figure}
 			
 			Inside this loops, all points are obtained by starting from the board centre and calculating the new point based on the radius of the given ring and the offset angle which change at every iteration.
 			
@@ -415,12 +478,21 @@
 			First of all, we must be able to click on zones polygons on the map for some in-game mechanics (getting zone info like which teams owns his power-up or how many other units are present in the zone), so we have to save them anyway.
 			Secondarily, the only reason for which we need the board perimeter is to check if someone exits it, but we can achieve the same information by checking if a position is inside any of the zones we saved: if it's not, the unit exited the board.
 			
-			% INSERT SCREENS OF WRONG PERIMETER
+			\begin{figure}[htp]
+				\centering
+				\includegraphics[width=.3\textwidth]{wrongboard1}
+				\hfill % Stretches the space between images to align them to borders
+				\includegraphics[width=.3\textwidth]{wrongboard2}
+				\hfill
+				\includegraphics[width=.3\textwidth]{wrongboard3}
+				
+				\caption{Three board drawings trials while developing \lstinline|BoardFactory|}\label{board:mess}
+			\end{figure}
 			
-			After some trial and error (\autoref{board:mess},  \autoref{board:dimensions}), I managed to obtain the right shape, but the radius I used to calculate the rings was obviously wrong.
+			After some trial and error (\autoref{board:mess}), I managed to obtain the right shape, but the radius I used to calculate the rings was obviously wrong.
 			Considering I wanted the zone to have the same area, I asked a friend of mine to run an R script to find which radius every ring must have in order to achieve it. Obviously the R script assumed the rings as circles, not as the weird shapes they actually are.
 			
-			After loops finish their run, the multidimensional array is used to fill in the perimeter ArrayList of every zone on the board.
+			After loops finish their run, the multidimensional array is used to fill in the perimeter \lstinline|ArrayList| of every zone on the board.
 			
 			The last part of the board fabrication is to make all zones aware of their neighbours. Unluckily, I could not think of a way to achieve this other than hard-coding it, and for now the map is simple enough to allow for this.
 			
@@ -496,7 +568,8 @@
 			
 			Then it will get the region bounds and keep selecting a random point inside that rectangle until the point we got is actually contained inside the given region.
 			
-			Once it found an acceptable point, it returns it wrapped in a \lstinline|GeoLocation| object.
+			Once it found an acceptable point, it returns it wr
+			apped in a \lstinline|GeoLocation| object.
 		
 		\subsection{Zone control manager}\label{focus:control}
 		
@@ -530,7 +603,68 @@
 			\paragraph{cancel}
 			If the singleton has actually been initialized, reset the presence manager removing all value and disconnect listeners.
 		
-		\subsection{Login system}\label{focus:splash}
+		\subsection{Splash screen and data pre-loading}\label{focus:splash}
+		
+			To avoid long loading times once inside the application, most of the common data to all activities are retrieved in the splash activity, which also manage players login.
+			This informations are then stored in the shared preferences or sent as extras attached to the intent.
+			
+			The splash screen is composed by two alternatively shown layouts: login and loading.
+			Login layout shows the application icon together with username and password fields and the login button.
+			Loading layout instead it's not interactive and just shows a loading animation and a text component which inform the user about which operations are being performed.
+			
+			Numerous steps have to be executed before the application can start flawlessly:
+			\begin{itemize}
+				\item perform login or auto-login;
+				\item retrieve unit and team id;
+				\item enable GPS;
+				\item retrieve current location;
+				\item check game current status.
+			\end{itemize}
+			
+			\paragraph{Login}
+			By default, the loading layout is the visible one, considering that thanks to an auto-login feature the login one is visible only for the first access or if an error occurs.
+			The email and password are stored in shared preferences after the first login and automatically inserted into the appropriate fields: if both email and password can be retrieved, the auto-login feature is turned on.
+			
+			When auto-login is not enabled, login layout is shown in place of the loading one and the user is prompted to insert email and password, which will be then used to initialize a Firebase Auth session.
+			
+			Firebase Auth natively provides a token-based auto-login feature, but its implementation is buggy so, after the Firebase Auth system initialization, we must block his attempt to perform his auto-login and, if needed, activate ours.
+			
+			Our implementation of the auto-login uses previously saved credential, losing some security with respect to the token-based system), to simply perform a normal login procedure, but automatized by the code.
+			
+			After the login completes successfully, the \lstinline|lastOnline| field of the current unit is updated.
+			
+			\paragraph{Unit and Team IDs}
+			
+			Unit id and team id are crucial for all activities: they're used in \lstinline|GeoFragment| (used both in \lstinline|PreparationActivity| and \lstinline|GameActivity|), \lstinline|TeamFragment|, \lstinline|AugmentedActivity|, etc. Those are almost \emph{all} the important parts of the application.
+			If every component had to retrieve them by his own (as it were at an earlier stage of the project), the code would have been a mess, with duplicate code in every class performing a call to the Firebase Auth system to get the user id and then to Firebase Database to get the team id using the previously retrieved user id.
+			For this reason, those IDs are directly retrieved right after the login and stored in the shared preferences in order to be accessible in every activity of the application.
+			
+			When performing the login, user id comes for free: during unit branch creation, its id is set as the same from Firebase Auth system, so it can be retrieved using \lstinline|FirebaseAuth.getCurrentUser().getUid()|.
+			Team id is retrieved right after, using a specific Firebase Database request upon the unit branch.
+			
+			\paragraph{GPS}
+			
+			Being a location-based AR, the GPS service must always be enabled while using the application, so the first thing to do is to switch it on.
+			To do so, we must first initialize the \lstinline|GoogleApiClient|, then get the system location service.
+			If it's GPS provider is already enabled (which means, if the GPS feature is turned on), we are fine and proceed to the next step, otherwise we must activate it: we create a new dummy \lstinline|LocationRequest| and launch it, thanks to the previously initialized \lstinline|GoogleApiClient|, to check if it can be activated.
+			If the request say the GPS can be enabled, we use the \lstinline|startResolutionForResult| provided by the GMS API to ask the user to give us the permission to do it on his behalf, otherwise there is a problem with the GPS provider which we cannot resolve so we just notify the error and return to login layout.
+			If the user decline our request to turn on the GPS, an error is displayed and we kindly ask him again, until he accept.
+			
+			\paragraph{Current location}
+			
+			Having obtained GPS permission, we use the \lstinline|FusedLocationApi| to get the last known location of the device with method \lstinline|getLastLocation|.
+			This powerful tool get all location service providers available in that moment (data network, Wi-Fi, GPS, smartphone sensors) and mix their data in order to get the most accurate position obtainable, exposing a simple API which can let the developer define which retrieve mode must be used (low battery consumption, high accuracy, etc.) while reducing at his best battery drain.
+			The last known location is kept by Android system which saves the value of the last position retrieved by any application or service using Google Play Services on that device.
+			Having retrieved a more or less accurate unit current position, we can store it and move to the last step of the initialization procedure.
+			If there is no last known location (\lstinline|getLastLocation| return a null pointer), we set-up and launch a \lstinline|LocationRequest| to get one: when we get it, we can proceed forward.
+			
+			\paragraph{Game status}
+			
+			Considering that the game can have any status when the user access the application, the last step is to query Firebase Database to check it and start the next activity accordingly.
+			If the game has \emph{INACTIVE} or \emph{INITIALIZE} status, we communicate to the user that the game is not ready to be accessed yet.
+			If it has \emph{PREPARE} status, we start the \lstinline|PreparationActivity|, which helps the players to display correctly on the game board.
+			If it has \emph{START} status, we start the \lstinline|GameActivity|, which manages the entire game.
+			If it has \emph{END} status, we start the \lstinline|EndActivity|, which informs all players of who won the game and gathers them to a common place where the winning team will be awarded and the event will continue.
 		
 		\subsection{Navigation drawer template}\label{focus:drawer}
 		
@@ -554,13 +688,73 @@
 		
 		\subsection{AR on map}\label{focus:map}
 		
+			One of the most complex yet fundamental challenge I had to overcome was the definition and creation of the \lstinline|GeoFragment|: a class that wraps the \lstinline|MapFragment| from Google Maps API and over which builds half the AR logic of the application.
+			
+			The main problems bounded to this component were retrieving the user position, other players tracking and displaying, and implementation of the visibility rules amongst users or between users and AR objects.
+			
+			Additionally, as described in \autoref{app:workflow}, this component is used in three different activities: \lstinline|PreparationActivity|, \lstinline|GameActivity| and \lstinline|EndActivity|.
+			The problems are the same for all activities, but must be managed differently based on which activity is instantiating the fragment.
+			
+			Other tasks performed by this component, either trivial or already discussed in other parts of this documents, are: map customization, zones download and board drawing, team color download and markers pre-loading.
+			
 			\subsubsection{Location sniffer}
 			
-			\subsubsection{Visibility rules} \label{focus:map:visibility}
+			\lstinline|MapFragment| by his own already comes with an easy to activate and use \emph{My Location} layer, which save us some trouble while adding others.
+			In fact, the default \lstinline|LocationSource| used for that layer is an internal one from which is not possible to get the location updates from an external code: once it's been set up, the location updates are directly sent to the \emph{My Location} layer without an access via some kind of API.
+			This meant that either I would have to recreate that layer on my own, or had to activate two location service requests. Thinking they are both unpleasant options, I searched and found for a more graceful third one which consist in a new utility component which implements the \lstinline|LocationSource| and \lstinline|LocationListener| interfaces and replicate the Google internal \lstinline|LocationSource| implementation as best as possible; this component, called \lstinline|LocationSnifferSource|, takes as parameters the activity to which is bound and an object implementing the \lstinline|LocationSniffer| interface (usually the activity itself), and send every location retrieved to the sniffer class right after sending it to the rightful object that activated the location source (in this case, the Google \emph{My Location} layer).
 			
-			\subsubsection{Player tracking}
+			In this way we are piggybacking on the location which would have retrieved anyway by the \emph{My Location} layer avoiding to ask for a location twice every time or to re-implement that layer.
+			
+			This component is then set as the \lstinline|LocationSource| which must be used by the Google Map component; this also prevent leaks, because the location source will be activated and deactivated automatically by the Google Map upon \lstinline|onStart|/\lstinline|onStop| methods of the \lstinline|MapFragment| life-cycle.
+			
+			\subsubsection{Other players tracking and displaying}
+			
+			Considering that every unit in game \emph{could} be visible over the board at any time and that the visibility rules are changes as the game phase or status changes, I decided to deal with the other players tracking storing all theirs informations while activating a listener on their position only on the ones which we really need to show on the board.
+			
+				\paragraph{Unit model}
+					
+				In order to keep the data of the units related to their representation on the map, a private class has been created: \lstinline|UnitData|.
+				This class holds some unit general informations (id, team, role) together with some more related to the location of the unit (GPS position and current zone), a reference to his marker and a location listener one.
+				
+				Role and current zone are automatically updated when they change on the database, this automatic sync is vital to the visibility system.
+				
+				The location field represent the last known GPS position of the unit, while the location listener reference is added or removed depending on when unit must be visible or not (we do not need to keep track of the movements of units we cannot see).
+				
+				The marker reference is used when the unit last known location is updated, causing the marker itself to move on the board, or when a unit disconnect, causing it to become partially transparent.
+			
+				\paragraph{Unit initialization}
+				
+				During the first set-up of the fragment, an \lstinline|HashMap<String,UnitData>| is filled with an entry per unit in game.
+				This entry, referenced by the unit id, is filled with the id, the team and the current role of the unit.
+				The unit is initially assumed to be out of the board, so we set the zone equal to 0: a listener is then added to keep the zone value synchronized with the database.
+				We set the current position to a dummy \lstinline|LatLng| in (0,0). This is needed because we are not sure that the unit currently have a position set on the database, but we \emph{must} provide one where to place the marker on the board.
+				The marker icon is a circular dot with the color of the team of the unit, it's title is the unit username and by default is set as not visible.
+				
+				A listener is added to keep the unit role in sync with the database, while another one keeps track of the presence of the unit (changing the transparency of the marker accordingly).
+				
+				Units which are in the same team as the current user are automatically set as always visible, and their location listener is activated.
+				
+			
+			\subsubsection{Visibility rules} \label{focus:map:visibility}
 		
-		\subsection{AR on camera}
+				Obtaining a clean code while managing the visibility rules had been an hard task, and I had to rethink several times how it worked before finding an acceptable solution.
+				This would have been trivial if all units could just see everybody else, but my idea was to limit their sight in order to force collaboration and communication amongst team-mates and to push them into trying to foresee other team movements from incomplete data.
+				This is why the visibility rules change accordingly to the game phase: while in \emph{TURN} phase the sight is limited and they must make assumption on what other teams are doing, in any other phase all units are visible, in this way the units can check if their assumption were right and can access the whole picture for some time in order to continue this prediction mini-game.
+				
+				% TABLE OF VISIBILITY
+				
+				The visibility rules are summarized in \autoref{focus:map:visibility:rules}, while the most are just a matter of enabling/disabling location listener of all the units and show/hide the markers, the most interesting to analyse are the ones of \emph{TURN} phase, which are applied in two step. 
+				
+				\paragraph{Zone limitation}
+				
+					The user can see only the units in his own zone (except from his team-mates which are always visible). This has initially been done setting a listener on the zone of every other unit and check if they were in the same as the current user, but it proved to be an infeasible solution because of the growing complexity of managing so many listeners related to a vital aspect of the code.
+					We switched % CONTINUE
+				
+				\paragraph{Role limitation}
+				
+					
+				
+		\subsection{AR on camera}\label{focus:augmented}
 			
 			\subsubsection{Player tracking}
 			

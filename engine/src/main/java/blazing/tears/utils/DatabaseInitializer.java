@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import static blazing.tears.constant.GamePhase.CONTROL;
 import static blazing.tears.constant.GameStatus.INACTIVE;
+import static blazing.tears.role.Role.UNSPECIFIED;
 
 public class DatabaseInitializer {
     private static final Logger LOG = Logger.getLogger(DatabaseInitializer.class.getName());
@@ -44,12 +45,16 @@ public class DatabaseInitializer {
             DatabaseReference teamRef = ref.child("team").push();
             teamRef.child("name").setValue(TEAM_NAMES.get(i));
             teamRef.child("color").setValue(TEAM_COLORS.get(i));
+            teamRef.child("money/loan").setValue(0);
+            teamRef.child("money/maximum").setValue(0);
 
             // Creates units for every team and set them as team members
             for (int j = 0; j < TEAM_UNIT_NUM; j++) {
                 DatabaseReference unitRef = ref.child("unit").push();
-                unitRef.child("email").setValue("dummy" + i + "-" + j + "@test.com");
+                unitRef.child("username").setValue("dummy" + i + "-" + j);
                 unitRef.child("team").setValue(teamRef.getKey());
+                unitRef.child("money").setValue(0);
+                unitRef.child("role").setValue(UNSPECIFIED);
 
                 teamRef.child("members/" + unitRef.getKey()).setValue(true);
             }
@@ -57,32 +62,40 @@ public class DatabaseInitializer {
             // Custom accounts to test the app
             if (i == 1) {
                 DatabaseReference unitRef = ref.child("unit/7g32vZ6Pw1MHU2Fm0oZ9hbYpmPv1");
-                unitRef.child("email").setValue("o.o_callo_o.o@hotmail.it");
+                unitRef.child("username").setValue("IlCallo");
                 unitRef.child("team").setValue(teamRef.getKey());
+                unitRef.child("money").setValue(0);
+                unitRef.child("role").setValue(UNSPECIFIED);
 
                 teamRef.child("members/" + unitRef.getKey()).setValue(true);
             }
 
             if (i == 2) {
                 DatabaseReference unitRef = ref.child("unit/MyJDDb9WmHPUCuIeHTqbFQbIdJn2");
-                unitRef.child("email").setValue("fbonnab@gmail.com");
+                unitRef.child("username").setValue("bonna");
                 unitRef.child("team").setValue(teamRef.getKey());
+                unitRef.child("money").setValue(0);
+                unitRef.child("role").setValue(UNSPECIFIED);
 
                 teamRef.child("members/" + unitRef.getKey()).setValue(true);
             }
 
             if (i == 3) {
                 DatabaseReference unitRef = ref.child("unit/IpTzc5KKiNYigtPQaEvnIZMZNNS2");
-                unitRef.child("email").setValue("pcalloc@gmail.com");
+                unitRef.child("username").setValue("WildCalloAppears");
                 unitRef.child("team").setValue(teamRef.getKey());
+                unitRef.child("money").setValue(0);
+                unitRef.child("role").setValue(UNSPECIFIED);
 
                 teamRef.child("members/" + unitRef.getKey()).setValue(true);
             }
 
             if (i == 4) {
                 DatabaseReference unitRef = ref.child("unit/hZuNKH7CqhfGZG4VUDZzunHHv3e2");
-                unitRef.child("email").setValue("callo92thebest@yahoo.it");
+                unitRef.child("username").setValue("Calloose");
                 unitRef.child("team").setValue(teamRef.getKey());
+                unitRef.child("money").setValue(0);
+                unitRef.child("role").setValue(UNSPECIFIED);
 
                 teamRef.child("members/" + unitRef.getKey()).setValue(true);
             }
