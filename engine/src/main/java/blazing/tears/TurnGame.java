@@ -33,8 +33,6 @@ import static blazing.tears.role.Role.UNSPECIFIED;
 public class TurnGame implements Runnable {
     private static final Logger LOG = Logger.getLogger(TurnGame.class.getName());
 
-    private static final int ZONES_NUM = 9;
-
     private static final int INITIAL_MONEY = 10;
 
     private static final int STARTING_ZONE_NUM = 3;
@@ -54,6 +52,15 @@ public class TurnGame implements Runnable {
     private static final int OMNIPRESENT_OBJECTIVE_NUM = 8;
     private static final String PEACEFUL_OBJECTIVE = "peaceful";
     private static final int PEACEFUL_OBJECTIVE_NUM = 8;
+
+    private static final int MONEY1_ZONE_COST = 7;
+    private static final int MONEY1_ZONE_EARN = 5;
+    private static final int MONEY2_ZONE_COST = 4;
+    private static final int MONEY2_ZONE_EARN = 3;
+    private static final int CALM_ZONE_COST = 7;
+    private static final int ROLE_ZONE_COST = 4;
+    private static final int UNTOUCHABLE_ZONE_COST = 9;
+    private static final int MULTITASKING_ZONE_COST = 9;
 
     private int mTurn;
     private Board mBoard;
@@ -246,15 +253,15 @@ public class TurnGame implements Runnable {
 
                 // Initialize zones and board
                 ArrayList<BaseZone> zones = new ArrayList<>();
-                zones.add(new MoneyZone(1, 7, 5));
-                zones.add(new MoneyZone(2, 7, 5));
-                zones.add(new MoneyZone(3, 4, 3));
-                zones.add(new MoneyZone(4, 4, 3));
-                zones.add(new CalmZone(5, 7));
-                zones.add(new RoleZone(6, 4));
-                zones.add(new RoleZone(7, 4));
-                zones.add(new ImmuneZone(8, 9));
-                zones.add(new MultitaskingZone(9, 9));
+                zones.add(new MoneyZone(1, MONEY1_ZONE_COST, MONEY1_ZONE_EARN));
+                zones.add(new MoneyZone(2, MONEY1_ZONE_COST, MONEY1_ZONE_EARN));
+                zones.add(new MoneyZone(3, MONEY2_ZONE_COST, MONEY2_ZONE_EARN));
+                zones.add(new MoneyZone(4, MONEY2_ZONE_COST, MONEY2_ZONE_EARN));
+                zones.add(new CalmZone(5, CALM_ZONE_COST));
+                zones.add(new RoleZone(6, ROLE_ZONE_COST));
+                zones.add(new RoleZone(7, ROLE_ZONE_COST));
+                zones.add(new UntouchableZone(8, UNTOUCHABLE_ZONE_COST));
+                zones.add(new MultitaskingZone(9, MULTITASKING_ZONE_COST));
 
                 mBoard = BoardFactory.createBoard(center, radius, zones);
 

@@ -2,9 +2,9 @@ package blazing.tears.zone;
 
 import static blazing.tears.role.Role.UNTOUCHABLE;
 
-public class ImmuneZone extends BaseZone {
+public class UntouchableZone extends BaseZone {
 
-    public ImmuneZone(int id, int cost) {
+    public UntouchableZone(int id, int cost) {
         super(id, cost, "The selected unit cannot be killed by assassins");
     }
 

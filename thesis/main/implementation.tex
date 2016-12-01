@@ -2,7 +2,7 @@
 
 	\section{Infrastructure}
 		
-		\subsection{Team management}
+		\subsubsection{Team management}
 		
 			Considering the kind of event bounded to the game usage, something gets clearly on mind: the team registration must be done long \emph{before} the event.
 			
@@ -10,20 +10,20 @@
 			In this way organizers will be able to directly communicate with all players of a given event.
 			This project won't cover that part and focus only on the mobile application part.
 		
-		\subsection{Data storage and manipulation}
+		\subsubsection{Data storage and manipulation}
 			
 			Instead of relying on an old-style SQL database accessed from a PHP/Java environment, the data management is achieved using a new platform: Firebase.
 			This service does a great job keeping data in sync between heterogeneous devices and offers a powerful API, together with a solid yet flexible security system based on data access rules.
 			One drawback is that complex queries cannot be performed with a single request and must be done using nested calls to the database, even if the heavy optimization implemented mitigate this problem.
 		
-		\subsection{Game}
+		\subsubsection{Game}
 		
 			Being backed by Firebase, the first idea was to avoid the back-end server completely, implementing some sort of all-in-app distributed game logic.
 			Unluckily, it resulted obvious that game status and phases, together with some conditions checks, needed a centralized code to be managed easily.
 			Actually this constraint is more a design-driven choice than a mandatory one: all the game logic \emph{could} be realized directly on the mobile application, synchronizing between all devices, but this would result in messy code and possibly open some security issues: not the most desirable scenario at all.
 			Considering this, the KISS (Keep It Simple, Stupid) approach has been followed and the two aspects of the game were separated.
 			
-			\subsubsection{Game logic}
+			\paragraph{Game logic}
 			
 				To support the game logic, a Java task on the server will run in loop interacting with the real time database observing the actions made by the players and eventually acting on his own to modify the game internal status. In particular it takes care of:
 				\begin{itemize}
@@ -38,7 +38,7 @@
 				
 				The many timers that the game logic must share with the application are saved on the database as their expiration date. In this way it's possible to every device in any moment to calculate the missing time to the expiration and set an internal time-out on their own.
 			
-			\subsubsection{Players logic}
+			\paragraph{Players logic}
 			
 				Player logic, instead, is managed by the application running on every device, which communicates directly with the real time database. In particular it takes care of:
 				\begin{itemize}
@@ -53,11 +53,11 @@
 		
 		The game follow a sequence of statuses, one of which is turn based (the more important, the actual "gaming" part).
 	
-		\subsection{Inactive}
+		\subsubsection{Inactive}
 		
 			The match has not been initialized, it's the default value when there is no game available.
 	
-		\subsection{Initialize}
+		\subsubsection{Initialize}
 		
 			The match is being initialized, performing various steps following a particular order:
 			
@@ -85,16 +85,16 @@
 				\end{enumerate}
 			\end{enumerate}
 		
-		\subsection{Prepare}
+		\subsubsection{Prepare}
 		
 			Units must reach their starting position: once everyone is within 10 meters from it, all listeners on the database are initialized and the match starts.
 		
-		\subsection{Start}
+		\subsubsection{Start}
 		\label{workflow:start}
 			
 			This is the core of the game: it's a loop which every turn execute five logical phases.
 				
-			\subsubsection{Control}
+			\paragraph{Control}
 			
 				Here the turn preparation is done: this part does not directly interact with the users, mostly checks and status updates are performed.
 			
@@ -107,26 +107,26 @@
 				
 				Lastly, the power-ups gained by the zones on which a building have been constructed are applied.
 				
-			\subsubsection{Roles}
+			\paragraph{Roles}
 			
 				Here the roles selection system is activated and players will choose their role for that turn following the rules explained in \autoref{nolead:role}.
 				The server will manage the timer of four minutes.
 				
-			\subsubsection{Actions}
+			\paragraph{Actions}
 				
 				After the role selection, another timer, one minute long, is set to let the players choose their action.
 				
-			\subsubsection{Money}
+			\paragraph{Money}
 				
 				Lastly, the money are borrowed by the players from team reserve as explained in \autoref{nolead:money}.
 				This phase also last one minute.
 							
-			\subsubsection{Turn}
+			\paragraph{Turn}
 			
 				Here the real game takes place: the server will keep a timer of fifteen minutes during which the players can act following their team objective or disrupting others plans.
 				Every action will be performed by the application, communicating directly to the database without server interaction. This does not mean that it will stay idle: every action made, as well as every player movement, will be recorded by the server on a log file from which will then be possible to run a match replay, in order to get statistics and to study it.
 			
-		\subsection{End}
+		\subsubsection{End}
 		
 			All players are notified that the game ended, displaying the winner team name, then a gathering location is shown and all players must reach it in order to meet-up with organizers and continue the event: the winner team will likely be awarded at this point with the possible prize.
 			
@@ -135,7 +135,7 @@
 		Data are modelled both on Firebase with his internal rules and in Android/Java with classic Java interfaces/classes.
 		Android model is a simplified version of the Java one, with many fields which are changed from custom classes to simple strings, because the clients only need a subset of the operations needed by the server and cannot access all informations (many are restricted based on who's reading them).
 		
-		\subsection{Firebase model}
+		\subsection{Firebase}
 			
 			In Firebase there is no concept of "data model" and the data structure definition de facto relies on the powerful yet flexible rule system which manage data access and manipulation.
 			The rule system allows to validate incoming data with a JavaScript-like language encapsulated in a JSON and to define constraints, for examples, on which children a particular branch must have in order to be valid. This can be seen as defining a constructor in Java which enforce the initialization of mandatory fields.
@@ -358,7 +358,7 @@
 			
 		\subsection{Java/Android}
 			
-			The Java data model reflects the Firebase data structure and the Android one is a copy/paste but with a lot of simplifications. It's not really useful to explain extensively all its classes with fields and methods, only notable pieces of code and differences between Java and Android models, and why they exists, will be described.
+			The Java data model reflects the Firebase data structure and the Android one is a copy/paste but with a lot of simplifications. Since it's not interesting to explain extensively all its classes with fields and methods, only notable pieces of code (the few which will not be covered in \autoref{focus:general}) and differences between Java and Android models, and why they exists, will be described.
 			
 			Obviously, the \lstinline|FirebaseSync| interface, as described in \autoref{focus:log}, is implemented only on the Java data model and not present in the Android one.
 			
@@ -368,21 +368,21 @@
 				
 				The static \lstinline|main| method is defined here and performs the endpoint operations:
 				\begin{description}
-					\item[Firebase service account] The server must be able to update the database ignoring some rules, as it's possible via the dashboard. Firebase permit to activate a service account with this power, based on a login JSON token previously downloaded and included in the project.
-					\item[Initialization] For testing purposes, only 4 users are actually registered on Firebase, while all others are just dummy records. This part resets the root branch setting it to null value, then proceeds in filling it again with all the values needed for a match in \emph{INACTIVE} mode: board centre and radius, teams and units dummy records, etc.
+					\item[Firebase service account] The server must be able to update the database ignoring some rules, as it's possible via the dashboard. Firebase permits to activate a service account with this power, based on a login JSON token previously downloaded and included in the project.
+					\item[Initialization] For testing purposes, only 4 users are actually registered on Firebase with a real mail and data, all others are dummy records. This part resets the root branch setting it to null value, then proceeds in filling it again with all the values needed for a match in \emph{INACTIVE} status: board centre and radius, teams and units dummy records, etc.
 					\item[Launch the game instance] The game instance, which implements the \lstinline|Runnable| interface, is eventually launched on a new thread, providing the Firebase reference initialized before.
 				\end{description}
 				
-				The \lstinline|run| method called when the thread is started just add a listener on the game \lstinline|status| field: every time it gets an update, a private method corresponding to the new status is called and acts as described in \autoref{workflow:general}.
+				The \lstinline|run| method called when the thread is started just adds a listener on the game \lstinline|status| field: every time it gets an update, a private method corresponding to the new status is called and acts as described in \autoref{workflow:general}.
 				It's important to note that only the server itself can change the \lstinline|status| field, the Android clients cannot access that branch in write mode.
 				
 				All match-related tunable parameters are defined here, like:
 				\begin{itemize}
-					\item Number of zones;
 					\item Number of starting zones;
 					\item Initial money for every team;
 					\item Duration of the various phases;
-					\item Objective tuning parameters.
+					\item Zones tuning parameters;
+					\item Objectives tuning parameters.
 				\end{itemize}
 			
 				Literally every information present in the Firebase Realtime Database can be accessed in some way from this class, in particular it keeps references to:
@@ -396,29 +396,27 @@
 			
 				In Android, this class is not present.
 				
-			\subsubsection{Team}
+			\subsubsection{Team and Objective}
 			
-				The members management (add, remove, get) have been stripped out in the Android version because not needed, all teammates are treated like normal units and their team id is enough to identify them. 
+				The members management (add, remove, get) has been stripped out in the Android version of the \lstinline|BaseGroup| (of which the actual \lstinline|Team| class is an extension) because not needed, all teammates are treated like normal units and their team id is enough to identify them. 
 				
-				While in the Java one the objective is represented as a custom class, because it's needed to check victory criteria and more operations, on Android it is simply a string containing the team objective description.
+				The team color is represented as a string in Java, where it must only be stored as in Firebase Database, but becomes an integer on Android, where it's used via the \lstinline|Color| native class (not present in Java), changing also its getter/setter to manipulate the alpha value of retrieved color.
 				
-				The team color is represented as a string in Java, where it must just be stored as in Firebase Database, but becomes an integer on Android, where it's used via the \lstinline|Color| native class (not present in Java), changing also its getter/setter to manipulate the alpha value of retrieved color.
+				While in the Java version the objective field of \lstinline|Team| is represented as a reference to an instance of \lstinline|BaseObjective|, needed to check victory criteria and store the objective description, on Android it's simply a string containing directly the team objective description, so the \lstinline|BaseObjective| class and its derivatives have been removed.
 			
 			\subsubsection{Unit}
 			
-				This central class of the Java model is not present in the Android version. This because all pieces of code which required to store information about the units (teammates display with Firebase UI and players data storage in \lstinline|GeoFragment| module), also needed an ad-hoc implementation too different from the server one and have instead been done as inner classes.
+				This central class of the Java model is not present in the Android version, because all pieces of code which required to store information about the units (teammates data using Firebase UI and players data storage in \lstinline|GeoFragment| module), also needed an ad-hoc implementation too different from the server one and have instead been done as inner classes.
 			
-			\subsubsection{Zone}
+			\subsubsection{Zone and Board}
 			
-			\subsubsection{Board}
+				These classes have been removed from the Android data model because similar classes from the Google Maps SDK already provided the same pieces of information, while adding some useful methods, apart from being mandatory in order to use most of the utilities in the library.
+				
+				The only interesting feature in the \lstinline|BaseZone| class is the zone control system, which will be explained in \autoref{focus:control}, and is not needed on the Android counterpart.
 			
-			\subsubsection{Building}
+			\subsubsection{Role and Action}
 			
-			\subsubsection{Objective}
-			
-			\subsubsection{Role}
-			
-			\subsubsection{Action}
+				Those classes have been retained the same from Java to Android, considering that they're no more than two enumerations and some utilities classes, mainly accessed in a static way as a singleton.
 			
 	\section{App workflow}\label{app:workflow}
 	
@@ -480,7 +478,7 @@
 		It's the last activity of the game, and it's composed solely by an instance of the GeoFragment as in \lstinline|PreparationActivity|.
 		Its main purpose is to gather players to the end position, where the winner will be awarded. When everybody has reached it, the game is finishes and the application force a logout of all players, changing the game status to \emph{INACTIVE}.
 	
-	\section{Main technological issues}
+	\section{Main technological issues}\label{focus:general}
 		
 		While working on the project, some particular or complex problems required a not trivial solution, which resulted in some interesting pieces of code.
 		Hopefully, the explanation about how they were solved here will be helpful for someone who'll need to follow this same path in the future.
