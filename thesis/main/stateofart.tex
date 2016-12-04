@@ -13,9 +13,9 @@
 		
 		AR is already used in many fields, in particular in industrial design, medical care and mostly in military.
 		
-		\subsubsection{Marker Based}
+		\subsubsection{Marker-based}
 			
-			It's based on geometric markers (like QR codes) placed in the space to be augmented, the algorithms that power this technology are capable of recognizing the marker and replace it on the final image stream with a 3D object.
+			Marker-based AR relies on geometric markers (like QR codes) placed in the space to be augmented: the algorithms that power this technology are capable of recognizing the marker and replace it on the final image stream with a 3D object.
 			This was the first attempt of realizing the AR concept.
 			
 			\begin{figure}
@@ -24,10 +24,10 @@
 				\caption{An example of how the marker technology works}
 			\end{figure}
 		
-		\subsubsection{Location Based}
+		\subsubsection{Location-based}
 		
-			It relies mainly on GPS and many other spatial sensors (accelerometer, gyroscope, etc.), this technology is the milestone that let many developers produce AR games located in the real world.
-			The main challenges for location-based apps had been the accuracy degree that was possible to achieve and the battery drain consequent to extended use of GPS, but now the Google \lstinline|FusedLocationProviderApi|, on Android, standardized the location retrieval exploiting together GPS, nearby Wi-Fi hotspot and cellular network, getting to 2-5 meters of accuracy, and managing in an efficient way the requests in order to save battery charge. % MISSING SOURCE
+			Location-based AR mainly relies on GPS and many others spatial sensors (accelerometer, gyroscope, etc.), this technology is the milestone that let many developers produce AR games located in the real world.
+			The main challenges for location-based applications had been the accuracy degree that was possible to achieve and the battery drain consequent to extended use of GPS; now the Google \lstinline|FusedLocationProviderApi| standardized the location retrieval exploiting together GPS, nearby Wi-Fi hotspots and cellular network while managing efficiently the requests to save battery charge; this allowed to reach 2-5 meters of accuracy. % MISSING SOURCE
 
 		\subsubsection{Markerless Tracker}
 			
@@ -35,27 +35,27 @@
 				In its simplest form, tracking can be defined as the problem of estimating the trajectory of an object in the image plane as it moves around a scene. In other words, a tracker assigns consistent labels to the tracked objects in different frames of a video. Additionally, depending on the tracking domain, a tracker can also provide object-centric information, such as orientation, area, or shape of an object.~\cite{ylmaz:tracking}
 			\end{quoting}
 			
-			This is the next generation of AR techniques, which uses algorithms to analyse the environment recorded from the camera and is capable of recognizing and tracking objects. Using this kind of technology, there is no more need to place any marker and the users can interact with the augmented world in a much more effective way.
+			This is the next generation of AR techniques. It uses particular algorithms to analyse the environment recorded from the camera and is capable of recognizing and tracking objects. Using this kind of technology, there is no more need to place any marker and the users can interact with the augmented world in a much more effective way.
 			
 	
 	\section{AR In Mobile Devices}
 	
-		AR main target nowadays is of course mobile devices (both smart phones and smart goggles) given the simultaneous presence of a display and an incorporated camera, united with more than decent processing units.
+		AR main target nowadays is of course mobile devices (both smart phones and smart goggles) given the simultaneous presence of a display, an embedded camera and more than decent processing units.
 		
-		This is pushing many companies in developing apps and frameworks, while a growing number of IT experts start to consider the AR more attractive than VR (Virtual Reality).
+		This is pushing many companies in developing applications and frameworks, while a growing number of IT experts start to consider the AR more attractive than VR (Virtual Reality).
 		
-		The main limitation that AR apps are facing in this field is surely the battery drain that the CPU intensive tasks, GPS usage and enabled cellular network take within themselves, but those limits are being pushed further and further by new generation devices.
+		The main limitation AR applications are facing in this field is surely the battery drain that CPU intensive tasks, GPS usage and enabled cellular network take within themselves, but those limits are being pushed further and further by new generation devices.
 		
-		Battery duration, as well as other tricks to limit power consumption (in this regard the new A10 processor from Apple with power differentiated cores is only the last of many optimization), soon won't be a problem any more and AR apps will probably bloom on the market.
+		Battery duration, as well as other tricks to limit power consumption (in this regard the new A10 processor from Apple, with power differentiated cores, is only the last of many optimizations), soon won't be a problem any more and AR applications will probably bloom on the market.
 		
 		\subsection{Main Frameworks}
 			
-			To build up the project, an AR framework with some specific features was needed, so the current panorama has been analysed to check which options had been developed in past years:
+			To build up the project, a AR framework with some specific features was needed, so the current panorama had been analysed to check which options had been developed in past years:
 			
 			\begin{description}
-				\item[cost] free or with a long enough free trial;
-				\item[location based] capable of managing \emph{at least} location based AR;
-				\item[license] under MIT or Apache 2.0, looking forward to use the project with commercial purposes;
+				\item[cost] free or with long enough free trial;
+				\item[location-based] capable of managing \emph{at least} location-based AR;
+				\item[licence] under MIT or Apache 2.0, looking forward to use the project with commercial purposes;
 				\item[alive] with a strong and passionate community keeping the project alive;
 				\item[documentation] good documentation by means of JavaDoc and examples;
 				\item[2D] capable of showing \emph{at least} 2D pictures in the AR layer.
@@ -65,90 +65,90 @@
 			
 			\subsubsection{Wikitude}
 			
-				By far, the best AR framework around. It manages 2D pictures and 3D animated objects, it support both native and JavaScript API, supports all 3 main AR technology (location based, marker based and markerless tracking), it's very active, always up to date with last OS and devices, has a good documentation and is distributed for use in commercial projects.
-				Only one point against: it's a subscription service, and not really one of the cheapest.
+				By far, the best AR framework around. It manages 2D pictures and 3D animated objects, supports both native and JavaScript API, supports all 3 main AR technology (location-based, marker-based and markerless tracking); it is very active and always up to date with last OS and devices; it has a good documentation and is distributed for use in commercial projects.
+				Only one point against: it is a subscription service and not really one of the cheapest.
 				A free trial is distributed, but it puts a watermark when using the framework, so it was left out from the choice.
 			
 			\subsubsection{DroidAR}
 				
-				Supports both marker base and location based AR, has a good documentation with JavaDoc wiki pages and examples, it can manage both 2D and 3D objects.
-				This seemed very promising at technical level, but had also a lot of flaws: the project has an open source GNU GPL v3 license, which make it impossible to use for commercial purposes as it is. Usage under another license is possible, but paying a fee, so it's still not acceptable.
+				It supports marker-based and location-based AR; it has good documentation with JavaDoc wiki pages and examples; it manages both 2D and 3D objects.
+				This seemed very promising at technical level, but had also a lot of flaws: the project has an open source GNU GPL v3 licence, which makes it impossible to use for commercial purposes as it is. Usage under another licence is possible, but paying a fee, so it is still not acceptable.
 				In addition, the project on GitHub has been dead for 4 years now, because the maintainers switched to develop v2, which is closed source.
 			
 			\subsubsection{Mixare}
 			
-				Another open source project, another failure. Mixare can only manage 2D objects which consist in a picture or shape and an optional label. The documentation is really poor, and the location based AR seems slow and buggy. It's free of charge, but only under GNU GPL v3 license. Last but not least, the project has been dead for more than 4 years.
-				Despite all those problems, the structure of the project and the ideas behind it are pretty clever, that's why it deserve at least a quote in this paper.
+				Another open source project, another failure. Mixare can only manage 2D objects which consist in a picture or shape and an optional label. The documentation is really poor, and the location-based AR seems slow and buggy. It is free of charge, but only under GNU GPL v3 licence. Last but not least, the project has been dead for more than 4 years.
+				Despite all those problems, the structure of the project and the ideas behind it are pretty clever, that is why it deserves at least a quote in this paper.
 			
 			\subsubsection{PanicAR}
 			
-				This framework seemed especially promising: it is focused on 2D pictures and location based AR and has a decent documentation.
-				Unluckily, it's free of charge only for non commercial projects, otherwise a watermark is added; moreover the Android porting, the framework is iOs native, is dead since 2 years.
+				This framework seemed especially promising: it is focused on 2D pictures and location-based AR and it has a decent documentation.
+				Unluckily, it is free of charge only for non commercial projects, otherwise a watermark is added; moreover the Android porting, the framework is iOs native, died 2 years ago.
 			
 			\subsubsection{BeyondAR}
 			
-				Has a really good documentation, tutorials and even a fully functional example app; it's location based and the API is pretty simple and intuitive; it's capable of managing both 2D and 3D objects. It's released under Apache 2.0 free of charge, still the development is open source.
-				Unluckily the project is currently dead since 2 years. Despite this, I decided to use this framework in the project, fixing by myself some known bugs and contributing to the development, hoping that the BeyondAR maintainer will come back at some point merging all the pull requests and resurrecting this already pretty good framework.
+				It has a really good documentation, tutorials and even a fully functional example application; it is location based and the API is pretty simple and intuitive; it is capable of managing both 2D and 3D objects. It is released under Apache 2.0 free of charge, still the development is open source.
+				Unluckily the project had no further contribution for 2 years. Despite this fact, I decided to use it in the project, fixing by myself some known bugs and contributing to the development, hoping that the BeyondAR maintainer will come back at some point merging all the pull requests and resurrecting this already pretty good framework.
 		
 		\subsection{Main AR Games}
 		\label{soa:games}
 		
-			Some pioneers already adventured in the mobile AR world and, considering that the main product of this thesis is an AR application, it's important to briefly describe the ones who managed to have a decent success, either because they are relevant to show the level AR games reached today or because some of their mechanics and idea are similar to the ones used in this project.
+			Some pioneers already adventured in the mobile AR world and, considering the main product of this thesis is a AR application, it is important to briefly describe the ones who managed to have a decent success, either because they are relevant to show the level AR games reached today or because some of their mechanics and ideas are similar to the ones used in this project.
 		
 			\subsubsection{Pokemon GO}
 			
-				Developed by Niantic in collaboration with Game Freak, Nintendo and The Pokémon Company, has been released to the public during 2016 summer and it quickly become a worldwide phenomenon, mostly because of the hype on the setting and in lesser part because of the actual technical advancements in AR technology it brings with itself, which in fact are scarce.
-				Classifiable more as an exergame (excercise game, fitness game) than as a Pokémon game, it heavily relies on location based AR (the only function that actually use the device camera is usually turned off by users because it slow down the app and consume more battery) and is substantially a map where you can see your virtual alter ego and some POIs (Points Of Interest) with which you can interact in a very basic way.
-				Three teams continuously fight each others to gain influence over special places and this pushes members of the same team to do it in groups to claim the area ownership faster.
+				Developed by Niantic in collaboration with Game Freak, Nintendo and The Pokémon Company, it had been released to the public during 2016 summer and it quickly became a worldwide phenomenon, mostly because of the hype on the setting and, to a lesser extent, because of the actual technical advancements in AR technology it brings in itself, which in facts are scarce.
+				Classifiable as an exergame (exercise game, fitness game) more than a Pokémon game, it heavily relies on location-based AR (there is just one feature that actually uses the device camera and it is usually turned off by users because it slows down the application and consumes more battery). It is based on a map where you can see your virtual alter ego and some POIs (Points Of Interest) with which you can interact in a very basic way.
+				Three teams continuously fight one another to gain influence over special places and this pushes members of the same team to act in groups to claim the area ownership faster.
 			
 			\subsubsection{Ingress}
 			
-				Developed by Niantic (actually their first AR game), is basically the same game as Pokémon GO, after you strip out the Pokémons and change the setting into a sci-fi one.
-				The influence that this game have on Pokémon GO, both in terms of UX (User eXperience) and underlying technology, is pretty strong.
+				Developed by Niantic (actually their first AR game), it is basically the same game as Pokémon GO, after you strip out the Pokémons and change the setting into a sci-fi one.
+				The influence that this game had on Pokémon GO, both in terms of UX (User eXperience) and underlying technology, is pretty strong.
 			
 			\subsubsection{Life is Crime}
 			
-				Developed by Red Robot Labs, is a location based RPG (Role Play Game) with a criminal setting; your neighbourhood become the game board and the game is based on the concept of forming a gang with other players living nearby and make your reputation rise doing virtual crimes, trying to become the kingpin of your zone.
+				Developed by Red Robot Labs, it is a location-based RPG (Role Play Game) with a criminal setting where your neighbourhood becomes the game board. The game is based on the concept of forming a gang with other players living nearby and make your reputation rise doing virtual crimes, trying to become the kingpin of your zone.
 				The software house apparently shut down everything in 2015 after the use of bots and cheats ruined the game.
 			
 			\subsubsection{Zombie, run!}
 			
-				Developed by Six to Start and Naomi Alderman, is the first and most famous exergame. Funded on Kickstarter, the game relies on location based AR and is mainly focused on the single player experience together with a good background story, going bucking with respect to other AR games.
-				The basic idea is simply to run away from zombies that spawn near you and to listen registrations explaining the story, with sporadic events that brings the community together.
-				The application has a seasonal life cycle where new missions, which also means new background story pieces, are released in blocks of 30-40.
-				A remarkable feature which has been added let the users set an arrival point and generate an on-the-fly mission which will get you there.
+				Developed by Six to Start and Naomi Alderman, it is the first and most famous exergame. Funded on Kickstarter, the game relies on location-based AR and is mainly focused on the single player experience together with a good background story, going bucking with respect to other AR games.
+				The basic idea is to run away from zombies spawning near you and to listen registrations explaining the story, with sporadic events that brings the community together.
+				The application has a seasonal life cycle where new missions, which means new background story pieces, are released in blocks of 30-40.
+				A remarkable feature which had been added lets the users set an arrival point and generates a mission on-the-fly which will get them there.
 			
 			\subsubsection{Parallel Kingdom}
 			
-				Developed by PerBlue, is the first location based territorial RPG and is based, as many others, in conquering surrounding areas.
+				Developed by PerBlue, it is the first location-based territorial RPG and is based, as many others, in conquering surrounding areas.
 				The game is based on a map over which custom markers are placed to identify buildings, monsters and players.
-				Both PvE (Player vs Environment) and PvP (Player vs Player) are supported, as well as travel, commerce and many features of classic RPGs.
-				It's easily the most complete AR RPG on the market.
+				Both PvE (Player versus Environment) and PvP (Player versus Player) are supported, as well as travel, commerce and many features of classic RPGs.
+				It is easily the most complete AR RPG on the market.
 			
 			\subsubsection{Father.IO}
 			
-				Developed by Proxy42, is the first FPS (First Person Shooter) using AR techniques to become, as said by the funders, an "Augmented Reality Laser Tag".
-				It relies on a physical add-on put over the smart phone, called Interceptor, used to fire laser beams at other players and receive the ones coming from them.
-				The interconnection system offer a good quality, since it combines GPS and local broadcasting to keep the latency low and the shots accuracy high.
+				Developed by Proxy42, it is the first FPS (First Person Shooter) using AR techniques to become, as said by the funders, an “Augmented Reality Laser Tag”.
+				It relies on a physical add-on put over the smart phone, called Interceptor, which is used to fire laser beams at other players and receive the ones coming from them.
+				The interconnection system offers a good quality, since it combines GPS and local broadcasting to keep latency low and shots accuracy high.
 				
 	\section{Structured recreational events}
 	
-		In recent years, a particular kind of event entered Italian panorama, usually transpositions of typical video-game adventures in real life.
-		These events are characterized by organizers that pre-set a location (which can be a room or a city, depending by the nature of the event), ask a pretty high fee to participate, are limited in time and usually carry with them a concept of gaming different from the classical "playing for fun": they usually present themselves as adventures and challenges more than games.
+		In recent years, a particular kind of events entered the Italian panorama: these are usually transpositions of typical video-game adventures in real life.
+		These events are characterized by organizers that pre-set a location (which can be a room or a city, depending by the nature of the event), ask a pretty high fee to participants, are limited in time and usually carry with them a concept of gaming different from the classical “playing for fun”: they usually present themselves as adventures and challenges more than games.
 		
 		\subsubsection{Room escape}
 		
 			\begin{quoting}
-				An escape room is a physical adventure game in which players are locked in a room and have to use elements of the room to solve a series of puzzles and escape within a set time limit. The games are physical versions of "escape the room" video games. Games are set in a variety of fictional locations, such as prison cells, dungeons and space stations, and are popular as team building exercises.~\cite{wiki:escape}
+				An escape room is a physical adventure game in which players are locked in a room and have to use elements of the room to solve a series of puzzles and escape within a set time limit. The games are physical versions of “escape the room” video games. Games are set in a variety of fictional locations, such as prison cells, dungeons and space stations, and are popular as team building exercises.~\cite{wiki:escape}
 			\end{quoting}
 		
 			This kind of game firstly spawned in 2006, then took over almost everywhere in the major cities of the world.
-			It can be considered one of the first attempt of bringing something which has its place in a virtual reality, back to the real world: if not in the technical realization, it's analogous to the AR-based games in his fundamental principles.
+			It can be considered one of the first attempt of bringing something which has its place in a virtual reality, back to the real world: if not in the technical realization, it is analogous to the AR-based games in its fundamental principles.
 		
 		\subsubsection{Zombie Run}
 		
-			Following the idea of taking video-games scenario into life, this kind of events are based in simulating a survival horror setting, in which the participants must usually run across a predefined path avoiding people disguised as zombies which will try to infect (touch) them. The path is fenced and traverse urban environment, giving to the event a pretty large playing area, even if limited.
+			Following the idea of taking video-games scenario into life, this kind of events is based on simulating a survival horror setting, in which participants must usually run across a predefined path avoiding people disguised as zombies which will try to infect (touch) them. The path is fenced and traverses urban environment, giving to the event a pretty large playing area, even if limited.
 		
 		\subsubsection{Paint-ball / Soft-air}
 			
-			This is more a transposition from actual warfare than video-games (which still helped in making it known to a larger public), but has some interesting characteristics, like the extension of area in which it's possible to play: for paint-ball it's roughly the size of a soccer field, but soft-air games can take place in an house (or group of houses) or even span over an entire forest.
+			This is a transposition from actual warfare more than from video-games (which still helped in making it known to a larger public), but it has some interesting characteristics, like the extension of the area in which it is possible to play: for paint-ball it is roughly the size of a soccer field, but soft-air games can take place in a house (or group of houses) or even span over an entire forest.
