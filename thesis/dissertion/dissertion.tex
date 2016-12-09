@@ -1,0 +1,268 @@
+% The TOPtesi class loads the following packets,
+% that's why they are commented below with a single %:
+% - graphicx
+% - babel
+% Other packages are explicitly forbidden by TOPtesi manual,
+% that's why they are commented below with a double %
+\documentclass[
+	%cucitura,				% To decomment when the printable version is needed
+	%draft,					% Comment after final revision, also hides images
+	twoside]				% Print on both side of the page
+	{toptesi}				% We'll be using the toptesi class
+
+%%% PACKAGES USAGE
+
+\usepackage[a-1b]{pdfx}		% Pdf format: PDF/A, mandatory for Polito thesis storage
+\usepackage[T1]{fontenc}	% Manages accented chars in output
+\usepackage[utf8]{inputenc}	% Input encoding, accept accented chars from keyboard
+\usepackage{amsmath,amssymb}% Math chars
+% \usepackage{graphicx}		% To include external images, loaded by toptesi class
+% \usepackage[english]{babel} % Main language of the document
+\usepackage{lipsum}			% Random text generator
+\usepackage{microtype}		% Allow some small characters to overflow the margin
+
+%%% DOCUMENT
+
+\begin{document}
+	%\english
+	
+	\mainmatter
+	
+	\textbf{\LARGE{Descrizione slide - discorso dissertazione}}
+	
+	\subsubsection{1 - Frontespizio e presentazione}
+	
+	\textbf{Tempo stimato:} 45 secondi. \\
+	
+	\textbf{Contenuto:} logo, titolo, nome, relatore, anno accademico \\
+
+	\textbf{Spiegazione:} Buongiorno, sono Paolo Caleffi e ho svolto il mio progetto di tesi sotto la supervisione del professor Malnati.
+	Sin da quanto sono venuto a studiare a Torino due anni fa, la mia idea è sempre stata quella di realizzare una tesi in ambito Android, un ambiente che mi affascina ed incuriosisce per la sua flessibilità e completezza.
+	Per questo mi sono rivolto a Malnati che mi ha proposto, rimanendo nell'ambito di applicazioni per smartphone, di orientarmi verso il mondo della realtà aumentata.
+	Il campo di applicazione che ho scelto per il progetto è quello degli eventi ricreativi strutturati.
+	Il progetto è dunque un gioco implementato con un'applicazione per Android che punta molto sulla realtà aumentata, fungendo da supporto e principale attrazione di eventi sia fini a se stessi che di promozioni per locali sul territorio.
+
+	\subsubsection{2 - Realtà aumentata}
+
+	\textbf{Tempo stimato:} 70 secondi. \\
+	
+	\textbf{Contenuto:} tipi realtà aumentata (marker-based, location-based, markerless) \\
+	
+	\textbf{Spiegazione:} La realtà aumentata è un concetto relativamente vecchio, recentemente entrato nell'immaginario collettivo dopo più di un ventennio passato in sordina.
+	Negli ultimi anni alcuni prodotti hanno puntato su questa tecnologia, andando dai Google Glass al più recente Pokémon GO. Realtà aumentata significa in sintesi mostrare entità virtuali sovrapposte al mondo reale. Attualmente ciò si può fare in tre modi:
+	\begin{description}
+		\item[basandosi sui marker] dove con marker si intende un talloncino con sopra stampato un pattern particolare. Questi marker vengono riconosciuti da un algoritmo e sostituiti sul display con un oggetto virtuale; il legame con i marker fisici rendono questa modalità scomoda da usare in ambienti aperti o estesi, inoltre il riconoscimento avviene solo entro una certa distanza ed angolazione;
+		
+		\item[basandosi sulla posizione] appurato che l'unico scopo dei marker è di fornire la posizione degli oggetti virtuali rispetto all'utente che li osserva, se conosciamo a priori la posizione GPS degli oggetti, possiamo usare un sensore per ottenere anche quella dell'utente; in questo modo si può sovrapporre la rappresentazione degli oggetti virtuali alla realtà osservabile, evitando i marker.
+		Grazie ai recenti miglioramenti della precisione del GPS, questa modalità è diventata abbastanza affidabile ed è quella che ho usato nel progetto di tesi;
+		
+		\item[basandosi su tracciamento dinamico] dove speciali algoritmi riconoscono la forma e tracciano i movimenti di entità reali partendo dai fotogrammi in cui sono presenti; è poi possibile applicare un qualche tipo di alterazione digitale come applicare un'etichetta sopra agli oggetti riconosciuti.
+	\end{description}
+	
+	\subsubsection{3 - Problemi dell'AR in ambito mobile}
+	
+	\textbf{Tempo stimato:} 60 secondi. \\
+	
+	\textbf{Contenuto:} consumo batteria, potenza del processore, localizzazione accurata \\
+	
+	\textbf{Spiegazione:} L'utilizzo della realtà aumentata su dispositivi mobili ha alcune limitazioni.
+	
+	\begin{description}
+		\item[Consumo della batteria] primo fra tutti vi è il problema del consumo della batteria; usare costantemente localizzazione GPS e traffico dati mette a dura prova la batteria dello smartphone, ma il fatto stesso che lo schermo debba essere sempre acceso per mostrare l'alterazione digitale prosciuga velocemente la batteria. Molte volte anche la fotocamera dovrà essere attiva, aumentando i consumi.
+		Questa limitazione è dunque temporale: un'applicazione che utilizza la realtà aumentata non può occupare per più di 3-4 ore lo smartphone di un utente; per fare fronte a questi problemi, il gioco sviluppato si impone una durata massima di due ore;
+		
+		\item[Potenza del processore] soprattutto per le tecnologie basate su marker o tracciamento dinamico, il processore viene messo sotto sforzo; l'utilizzo della realtà aumentata basata sulla posizione limita questo utilizzo eccessivo del processore, ma anche altri accorgimenti ed ottimizzazioni sono stati implementati nell'applicazione per evitare rallentamenti durante l'utilizzo;
+		
+		\item[Problemi di geolocalizzazione] per quanto sia diventato affidabile, il GPS è influenzato da diversi fattori; fatica a fornire una posizione in ambienti chiusi o schermati e può richiedere tempi di inizializzazione non immediati; una proposta di soluzione a riguardo è la creazione di un servizio in background apposito che tenga sempre attivo il sistema GPS, evitando i tempi di inizializzazione. Inoltre, il gioco si svolge all'aperto, limitando i problemi di scarsa ricettività.  
+	\end{description}
+	
+	\subsubsection{4 - Framework AR per mobile}
+	
+	\textbf{Tempo stimato:} 65 secondi. \\
+	
+	\textbf{Contenuto:} Wikitude, DroidAR, BeyondAr (framework utilizzato) \\
+	
+	\textbf{Spiegazione:} Per evitare di partire da zero, ho cercato e valutato i framework per Android attualmente disponibili.
+	I principali vincoli che ho imposto sono stati: il costo basso o nullo, una licenza adatta all'utilizzo commerciale del prodotto e la vitalità del progetto.
+	Quest'ultimo fattore in particolare è risultato negativo nella totalità dei framework open-source trovati.
+	I framework più promettenti sono stati:
+	\begin{description}
+		\item[Wikitude] il migliore sul mercato, il problema è il costo: è un servizio in abbonamento e anche piuttosto caro; è possibile utilizzarlo gratuitamente, ma con un watermark in sovrimpressione, quindi è stato scartato;
+		
+		\item[DroidAR] non completo come Wikitude, ma con tutte le funzionalità necessarie per il progetto; purtroppo, è coperto da licenza GPLv3, che lo rende inutilizzabile per progetti commerciali a meno di un compenso concordato direttamente con gli sviluppatori. Oltre a ciò, il progetto è morto da quattro anni;
+		
+		\item[BeyondAr] molto simile a DroidAR, ma con meno funzionalità; in compenso, è distribuito con licenza Apache 2.0, che lo rende adatto ad un uso commerciale; anche questo progetto purtroppo appare morto da due anni, ma è il meglio attualmente disponibile gratuitamente, quindi la mia scelta finale è ricaduta su di esso.
+	\end{description}
+	
+	\subsubsection{5 - Pionieri dei giochi mobile in AR}
+	
+	\textbf{Tempo stimato:} 65 secondi. \\
+	
+	\textbf{Contenuto:} attuale paradigma dominante dei giochi mobile; esempi di giochi AR mobile (Pokémon GO \& Ingress, Father.IO, Zombie Run!) \\
+	
+	\textbf{Spiegazione:} Ovviamente ci sono stati vari pionieri nell'ambito dei giochi in realtà aumentata.
+	
+	\begin{description}
+		\item[Pokémon GO \& Ingress] entrambi prodotti dalla Niantic, utilizzano la tecnologia basata sulla posizione per mostrare l'utente su una mappa indicando i punti di interesse più vicini; il primo è sicuramente il gioco in realtà aumentata più famoso di sempre, seppure la realtà aumentata sia usata solo nella mappa, senza effettivamente una sovrapposizione dei Pokémon nell'ambiente reale;
+		
+		\item[Father.IO] è un tentativo di portare il genere sparatutto in prima persona in ambito mobile utilizzando la realtà aumentata molto più di quanto faccia Pokémon GO;
+		
+		\item[Zombie, Run!] è un exergame che punta alle persone che fanno jogging, dandogli un motivo per correre: degli zombie virtuali compaiono casualmente sul percorso dell'utente, che dovrà correre più forte e cambiare direzione per evitarli; durante la corsa vengono riprodotte registrazioni che svelano corsa dopo corsa sempre più dettagli sulla storia.
+	\end{description}
+	
+	Questi giochi, come in generale tutti quelli attuali per mobile, negli ultimi anni si sono sempre più orientati verso una filosofia pay-per-win, più paghi più il gioco è facile, molte volte a discapito della qualità del gioco stesso o rendendo praticamente impossibile il giocare senza spendere.
+	
+	\subsubsection{6 - Cercando una nuova strada: giochi da tavolo e AR}
+	
+	\textbf{Tempo stimato:} 55 secondi. \\
+	
+	\textbf{Contenuto:} nuovo paradigma proposto (su cui si basano già boardgames) che si è tentato di applicare; esempi di boardgame supportati da app (MoM) o portati su app (Monopoly, Risiko, Carcassonne) \\
+	
+	\textbf{Spiegazione:} Di contro, la filosofia che ho cercato di trasmettere con questo progetto è quella del valorizzare il tempo speso giocando e della sfida, contro se stessi o contro gli altri.
+	Fonte di ispirazione in tal senso sono stati i giochi da tavolo che si basano proprio sulle stesse premesse e si focalizzano sul mettere alla prova le capacità cognitive e strategiche di una persona.
+	
+	Vari giochi da tavolo classici hanno da tempo capito l'opportunità della piattaforma mobile ed è possibile trovare versioni digitali dei giochi più conosciuti ed apprezzati (Monopoli, Risiko, Carcassonne, etc.), ma solo negli ultimi tempi si vedono i primi esempi di giochi da tavolo ibridi, con una componente software che \emph{supporta} quella fisica, invece che soppiantarla: non siamo nel campo della realtà aumentata, ma le basi sono simili.
+	
+	Sono anche presenti giochi classici ripensati per la realtà aumentata, per esempio gli scacchi con i marker al posto dei pezzi fisici, in cui sono mostrate le animazioni quando si mangiano i pezzi avversari.
+	
+	\subsubsection{7 - Eventi ricreativi strutturati}
+	
+	\textbf{Tempo stimato:} 50 secondi. \\
+	
+	\textbf{Contenuto:} connubio tra il paradigma proposto e gli eventi strutturati (come si è pensato che debbano interagire, esistono già tentativi in questo senso?); esempi di eventi strutturati (Escape Room, Zombie Run) \\
+	
+	\textbf{Spiegazione:} Il miglior campo di applicazione in cui l'anima che ho voluto dare al progetto, l'utilizzo della realtà aumentata e le possibilità di monetizzazione si incontrano è quello degli eventi ricreativi strutturati.
+	
+	Gli esempi più famosi di questo tipo di eventi sono le varie Escape Room e Zombie Run che stanno prendendo sempre più piede anche in territorio italiano: eventi organizzati, con numero di participanti limitato, il cui costo di adesione è medio-alto e che solitamente forniscono una sorta di sfida per persone o squadre; non per niente, questo tipo di eventi viene spesso usato dalle aziende come attività di teambuilding.
+	
+	Più in piccolo, sono presenti organizzazioni che si occupano di intrattenimento per adulti sotto forma di serate a tema, ed è questo il caso d'uso pensato per il progetto: essere un supporto per queste serate che gestisca in autonomia la parte di gioco, in cui l'ambientazione viene cambiata a seconda del tema, ma mantenendo la stessa base di codice e meccaniche di gioco.
+	
+	\subsubsection{8 - Discworld - Ankh-Morpork}
+	
+	\textbf{Tempo stimato:} 70 secondi. \\
+	
+	\textbf{Contenuto:} ispirazione (Discworld - Ankh-Morpork); caratteristiche che lo rendono adatto alla trasposizione; menzione delle 3 versioni ideate; breve descrizione della versione scelta per l'implementazione \\
+	
+	\textbf{Spiegazione:} Il gioco in sè e le sue meccaniche derivano da un gioco da tavolo: Discworld - Ankh-Morpork; questo gioco infatti presenta degli aspetti particolari che lo rendono adatto ad una trasposizione in realtà aumentata, due in particolare:
+	\begin{itemize}
+		\item il tabellone di gioco è una città divisa in quartieri; nel mio progetto il tabellone resta, ma diventa virtuale e si estende su un'intera area cittadina;
+		
+		\item ogni giocatore interpreta una personalità influente che gestisce i suoi sgherri, chiamati unità, nella città; nel mio progetto, ogni personalità è sostituita da un'intera squadra ed i giocatori stessi diventano le unità che si muovono e compiono azioni coordinate per portare la squadra alla vittoria.
+	\end{itemize}
+
+	La prima trasposizione delle regole era decisamente complessa: prevedeva la presenza di un capitano per squadra che vedeva i movimenti e le azioni di tutte le unità, gestiva ruoli e soldi e guidava la propria squadra con consigli strategici; tutto questo da una postazione PC, tramite una web-app.
+	
+	Per rendere i capitani più partecipi, e non dover implementare la web-app, è stata pensata una variante in cui hanno meno responsabilità, ma sono coinvolti attivamente nel gioco: una specie di comandante sul campo, piuttosto che uno stratega, come era nella prima versione.
+	
+	Infine si è arrivati ad una versione senza capitani, in cui tutti gli aspetti di gestione della squadra sono ripartiti fra le unità; questa è la versione che è stata implementata.
+
+	\subsubsection{9 - Obiettivi di design}
+	
+	\textbf{Tempo stimato:} 100 secondi. \\
+	
+	\textbf{Contenuto:} lavoro di squadra, valorizzazione del tempo speso, variabilità delle strategie. \\
+	
+	\textbf{Spiegazione:} Durante lo sviluppo del progetto, si sono perseguiti quattro obiettivi principali:
+	\begin{description}
+		\item[Avvantaggiare il lavoro di squadra] con regole di gioco pensate per fare crescere le possibilità di vittoria di pari passo con la coordinazione della squadra, partendo dalla gestione condivisa delle risorse ed arrivando alla pianificazione di una strategia comune;
+		
+		\item[Valorizzare il tempo speso] dove il termine "speso" non è casuale; il giocatore che partecipa a questo gioco paga per avere un prodotto di qualità che lo diverta mettendo alla prova le sue capacità; il gioco viene dunque presentato come un'avventura o una sfida: su questo puntano sia le varie Escape Room e Zombie Run che il mio progetto, cercando di mantenere sempre alta la tensione in gioco e alternando momenti di concitazione a brevi istanti di calma; il gioco è anche soggetto ad una scadenza temporale stringente, circa 2 ore, che dovrebbe spingere i giocatori ad impegnarsi al massimo sin dal principio;
+		
+		\item[Favorire la variabilità delle strategie] fornendo un'esperienza di gioco che non corra su un binario unico, ma che lasci ai giocatori la scelta di come perseguire il proprio obiettivo; per esempio la squadra che deve guadagnare più monete possibili potrà riuscirci sia raccogliendo quelle generate dal gioco, sia usando gli assassini per rubarle alle altre squadre;
+		
+		\item[Trovare un buon metodo di monetizzazione] in quando il rifiuto del sistema pay-per-win, rende l'avere un ritorno economico difficile, ma non impossibile; si propone di fornire il software ad organizzazioni attive nel campo dell'intrattenimento in cambio di una percentuale sugli introiti; il gioco andrebbe legato ad un pacchetto "tutto incluso" comprensivo di cena e pernottamento; l'associazione Passaporta di Reggio Emilia sarà tester e primo cliente del prodotto una volta finito.
+		Altre possibilità sono il noleggio del software a canone fisso a locali che vogliano farsi pubblicità o proporre il gioco alle aziende come attività di team-building.
+	\end{description}
+	
+	\subsubsection{10 - Meccaniche di gioco}
+	
+	\textbf{Tempo stimato:} 100 secondi. \\
+	
+	\textbf{Contenuto:} sistema dei ruoli ed azioni, riserva monetaria di squadra, le zone (potenziamenti, palazzi, zone caotiche o meno), obiettivi, eventi randomici, turni. \\
+	
+	\textbf{Spiegazione:} Le principali meccaniche di gioco sono:
+	\begin{description}
+		\item[la suddivisione del turno] in due macro fasi: la prima è dedicata alla gestione condivisa della squadra, in cui i giocatori scelgono il loro ruolo, l'azione e prendono in prestito monete dalla riserva della squadra, mentre la seconda è la vera e propria parte di gioco, dove i giocatori potranno muoversi liberamente per la mappa ed interagire con gli oggetti virtuali o con le altre unità;
+		
+		\item[il sistema di ruoli ed azioni] che definisce le interaziomi che i giocatori possono compiere durante il turno, dipendentemente da qual'è il loro ruolo ed azione in quel momento; i principali ruoli sono il poliziotto, l'assassino e il costruttore ed offrono due azioni tra cui scegliere; sono pensati per contro-bilanciarsi a catena; un ruolo secondario è invece quello dell'esattore, il cui scopo è raccogliere monete per la riserva della squadra; i membri della squadra dovranno spartirsi un numero limitato di ruoli per tipo, quindi non potranno mai esserci più di 3 giocatori con lo stesso ruolo nella stessa squadra;
+		
+		\item[la riserva monetaria] condivisa della squadra; all'inizio del turno i giocatori chiedono di prendere dei soldi per utilizzarli durante il gioco e alla fine dello turno le monete non utilizzate vi confluiscono dentro nuovamente;
+		
+		\item[le zone] in cui il tabellone virtuale è diviso; pagando una certa somma di monete, i costruttori possono erigere un palazzo in una zona, ottenendo un potenziamento per la propria squadra; le zone possono essere in stato calmo o caotico, questo stato può essere influenzato dai poliziotti e dai costruttori e ha implicazioni sulle azioni degli assassini, che non possono assassinare se la zona è calma, e dei costruttori, che non possono costruire se è caotica; 
+		
+		\item[obiettivi] gli obiettivi sono diversi da squadra a squadra e si basano pricipalmente sullo stato interno delle zone, sulla posizione dei giocatori e sulla riserva monetaria delle squadre;
+		
+		\item[eventi] durante il gioco è anche possibile che si verifichino degli eventi randomici che influenzano negativamente zone o squadre in modo casuale. 
+	\end{description}
+	
+	\subsubsection{11 - Infrastruttura}
+	
+	\textbf{Tempo stimato:} 45 secondi. \\
+	
+	\textbf{Contenuto:} applicazione mobile, applicazione server, Firebase \\
+	
+	\textbf{Spiegazione:} L'infrastruttura del progetto si basa su tre pilastri:
+	\begin{description}
+		\item[L'applicazione Android] che è l'interfaccia attraverso la quale i giocatori usano il gioco, nonchè la parte più corposa in termini di tempo speso e codice prodotto;
+		
+		\item[L'applicazione Java sul server] che gestisce l'intero ciclo degli stati e delle fasi del gioco, oltre ad effettuare un servizio di monitoraggio e logging delle azioni compiute;
+		
+		\item[Firebase] che fornisce servizi utili in varie fasi; Firebase è nato come servizio di messaggistica instantanea multipiattaforma, si è evoluto in una suite di servizi volti ad eliminare del tutto o in parte la necessità di codice lato server; i suoi servizi utilizzati in questo progetto sono il database in tempo reale, che permette di sincronizzare dati tra tutti i device connessi, il sistema di autenticazione per gli utenti e, anche se non ancora implementato nel progetto, il sistema di messaggistica in-game.
+	\end{description}
+	
+	\subsubsection{12 - Focus: GeoFragment}
+	
+	\textbf{Tempo stimato:} 75 secondi. \\
+	
+	\textbf{Contenuto:} breve descrizione dei principali problemi affrontanti e risolti nell'AR su mappa (gestione e visualizzione degli altri utenti in gioco, regole di visibilità e perchè sono state pensate in quel modo) \\
+	
+	\textbf{Spiegazione:} Vari pionieri della realtà aumentata hanno utilizzato la tecnologia basata sulla posizione legandola ad una mappa. Anche io ho affrontato questa necessità e mi sono appoggiato a Google Maps.
+	
+	Come base ho usato un MapFragment, componente fornito da Google, incapsulato in un altro fragment con cui ho aggiunto le funzionalità di realtà aumentata.
+	
+	Le parti più complesse sono state la gestione dei movimenti dei giocatori e delle regole di visibilità tra gli stessi.
+	
+	I dati di tutti i giocatori della partita sono scaricati alla prima inizializzazione e salvati in una struttura apposita, capace di attivare o disattivare il tracciamento su un certo giocatore, oltre a tenere automaticamente aggiornate altre informazioni utili. Sulla mappa, ogni giocatore è indicato come un pallino con il colore del suo team, in trasparenza se risulta offline in quel momento.
+	
+	I giocatori non vedono dove sono tutti gli altri durante la fase di gioco, ma solo quelli che passano un doppio filtro, sulla zona e sul ruolo attuale; per esempio un poliziotto vedrà solo i giocatori nella sua zona che abbiano il ruolo di assassino.
+	
+	Durante le fasi di controllo queste regole di visibilità decadono. In questo modo si alimenta una sorta di gioco mentale in cui i giocatori possono vedere la posizione di tutti per un breve periodo, formulare quindi ipotesi sulle intenzioni degli altri team e comportarsi di conseguenza. Prevedere cosa stanno facendo e cosa faranno le squadre avversarie permette di intuire quale sia il loro obiettivo, quindi come ostacolarli. Uno degli obiettivi si basa proprio sull'evitare che chiunque riesca a vincere prima dell'ottavo turno.
+	
+	\subsubsection{13 - Focus: Augmented activity}
+	
+	\textbf{Tempo stimato:} 50 secondi. \\
+	
+	\textbf{Contenuto:} breve descrizione dei principali problemi affrontati e risolti nell'AR su videocamera (gestione e visualizzazione degli altri utenti in gioco, interazioni possibili e proposta di implementazione delle stesse) \\
+	
+	\textbf{Spiegazione:} Il secondo modulo sulla realtà aumentata gestisce la parte basata sulla fotocamera che si occupa delle interazioni tra i giocatori e con gli oggetti virtuali.
+	
+	Questi ultimi sono visibili entro 80 metri, mentre i giocatori entro 25; la libreria GeoFire, basata su Firebase, permette di effettuare query geolocalizzate in un punto dato il raggio di azione indicando chi o cosa sarà visibile.
+	
+	Per motivi di tempo il sistema delle interazioni non è stato implementato, ma solo teorizzato.
+	
+	\begin{description}
+		\item[assassinare o proteggere un'unità] si basano sullo stare vicino al bersaglio per una certo lasso di tempo;
+		\item[costruire o demolire un palazzo] si basano su un minigioco incentrato sul fare gesti e tocchi col giusto tempismo;
+		\item[calmare o redere caotica una zona] si basano sul seguire un percorso generato casualmente;
+		\item[collezionare monete] si basa semplicemente sull'avvicinarsi alle monete generate casualmente.
+	\end{description}
+	
+	\subsubsection{14 - Conclusioni e sviluppi futuri}
+	
+	\textbf{Tempo stimato:} 50 secondi. \\
+	
+	\textbf{Contenuto:} attuali problemi rilevati/ipotizzati e possibili soluzioni (localizzazione GPS e timer basati su un servizio Android, VoIP per la comunicazione), esempi di miglioramenti (servizio di replay delle partite, generazione dinamica della mappa di gioco) \\
+	
+	\textbf{Spiegazione:} Sebbene non completo in alcuni suoi moduli, il progetto segue le linee guida prefissate.
+	
+	Tra i problemi o possibili miglioramenti troviamo:
+	
+	\begin{description}
+		\item[geolocalizzazione intermittente dei giocatori] in quanto quest'ultima viene effettuata solo quando l'applicazione è attiva. Questo comporta uno sfasamento del mondo reale con quello virtuale, rovinando l'esperienza di gioco. Questa parte dovrebbe essere spostata in un modulo a se stante basato su un servizio di Android sempre attivo a cui l'applicazione si rivolgerà per ottenere la posizione attuale;
+		\item[comunicazione VoIP] in quanto la messaggistica testuale è troppo lenta e scomoda; una libreria che la implementi su un servizio affinchè funzioni anche quando il gioco non è attivo, potrebbe essere un ottimo tema per un progetto di tesi;
+		\item[generazione dinamica tabellone di gioco] sulla base di un algoritmo che dia forma alle zone in base alle caratteristiche fisiche dell'area in cui si svolge l'evento.
+	\end{description}
+	
+	Grazie per l'attenzione.
+	
+\end{document}

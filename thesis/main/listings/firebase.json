@@ -1,0 +1,335 @@
+{
+  "rules": {
+    // Game info
+    "game": {
+      // Read by everyone
+      ".read": "true",
+      ~
+      \
+      label{
+  firebase: game
+  :
+  read
+}~
+// Must have status field
+".validate": "newData.hasChildren(['status'])",
+// Current game status
+"status": {".validate": "newData.isString() && (newData.val() === 'INACTIVE' || newData.val() === 'INITIALIZE' || newData.val() === 'PREPARE' || newData.val() === 'START' || newData.val() === 'PAUSE' || newData.val() === 'RESUME' || newData.val() === 'END')" }, ~\label{firebase: game:status
+}~
+
+// Board parameters
+"board": {
+~\label{firebase: game: board
+}~
+// Must contain center and radius fields
+".validate": "newData.hasChildren(['center', 'radius'])",
+"center": {
+// Must contain latitude and longitude fields
+".validate": "newData.hasChildren(['latitude', 'longitude'])",
+// Both of type double
+"latitude": {".validate": "newData.isNumber()"},
+"longitude": {".validate" : "newData.isNumber()"},
+"$other": {".validate": false }
+},
+"radius": {".validate": "newData.isNumber()"},
+"$other": {
+".validate": false
+}
+},
+
+// Used only in PREPARE, n. of units which have not yet reached their starting position
+"unitsToWait": {".validate": "newData.isNumber() && newData.val() >= 0"}, ~\label{
+firebase: game: wait
+}~
+
+// Used only in START, current phase
+"phase" : {".validate": "newData.isString() && (newData.val() === 'CONTROL' || newData.val() === 'ROLE' || newData.val() === 'ACTION' || newData.val() === 'MONEY' || newData.val() === 'GAME')"}, ~\label{
+firebase: game: phase
+}~
+
+// Used only in START, expiration moment of the currently active timer
+"timer": {".validate": "newData.isNumber() && newData.val() >= now"}, ~\label{firebase: game: timer
+}~
+
+// Used only in START, current turn
+"turn": { ".validate": "newData.isNumber() && newData.val() >= 0"}, ~\label{firebase: game: turn
+}~
+
+// Used only in START, random event info
+"event": {
+~\label{firebase: game: event}~
+// Must contain possible and probability fields
+".validate": "newData.hasChildren(['possible', 'probability'])",
+"possible": {
+"$event_name": {
+// Event name must be one of the following and his value must be the boolean true
+".validate": "newData.isBoolean() && newData.val() === true && ($event_name === 'banishment' || $event_name === 'demons' || $event_name === 'drake' || $event_name === 'earthquake' || $event_name === 'explosion' || $event_name === 'fire' || $event_name === 'fog' || $event_name === 'tax')"
+}
+},
+"probability": {".validate" : "newData.isNumber() && newData.val() >= 0"},
+"$other": {".validate": false }
+},
+// Used only in END, it's the winner of the match
+"winner": {".validate": "root.child('team/' + newData.val()).exists()"}, ~\label{firebase: game: winner}~
+
+"$other": {
+".validate": false
+}
+},
+// Group of units which pursue the same objective
+"team": {
+// Team info can be read by all units
+".read": "auth !== null", ~\label{
+firebase: team: read
+}~
+
+"$team_id" : {
+// Must have name and members field
+".validate": "newData.hasChildren(['name', 'money', 'loanOverflow', 'members'])",
+// Color
+"color": {".validate" : "newData.isString() && (newData.val() === 'red' || newData.val() === 'yellow' || newData.val() === 'green' || newData.val() === 'white' || newData.val() === 'purple')"}, ~\label{firebase:team: color
+}~
+
+// Name
+"name": {
+".validate": "newData.isString() && newData.val().length > 3 && newData.val().length < 35"}, ~\label{firebase: team: name
+}~
+
+// Objective description
+"objective": {
+".validate": "newData.isString() && newData.val().length > 10" }, ~\label{firebase: team:objective
+}~
+
+// Members of this team
+"members": {
+~\label{firebase: team: members
+}~
+// Check if the unit added to the team members really exists
+"$unit_id": { ".validate": "root.child('unit/' + $unit_id).exists() && newData.isBoolean() && newData.val() === true"}
+},
+// Money reserve, both with current loan and maximum value
+"money": {~\label{firebase: team: money}~
+".validate": "newData.hasChildren(['loan', 'maximum'])",
+// Currently active loan (number of coins taken from the reserve for this turn)
+"loan": {
+// Modifiable only by the team members
+".write": "data.parent().parent().child('members/' + auth.uid).exists()",
+// Must be a number in range between 0 and the maximum money in the reserve
+".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= data.parent().child('maximum').val()"
+},
+// Number of coins in the team reserve, must be greater or equal to 0
+"maximum": {
+".validate" : "newData.isNumber() && newData.val() >= 0"},
+"$other": {".validate": false }
+},
+// Role pool, both with current and maximum roles
+"roles": {~\label{firebase: team: roles
+}~
+// All roles in this team pool
+"$role": {
+// Roles are restricted to the known ones
+".validate": "($role === 'COP' || $role === 'ASSASSIN' || $role === 'BUILDER' || $role === 'COLLECTOR' || $role === 'UNTOUCHABLE' || $role === 'MULTITASKING') && newData.hasChildren(['current', 'maximum'])",
+// Taken roles
+"current": {
+// May be modified only if the current user is a member of this team (parent chain goes $role -> roles -> team)
+".write": "data.parent().parent().parent().child('members/' + auth.uid).exists()",
+// Must be a number in range between 0 and the number of maximum roles
+".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= data.parent().child('maximum').val()"
+},
+// Total available roles, must be a number greater or equal to 0
+"maximum": {
+".validate" : "newData.isNumber() && newData.val() >= 0"},
+"$other": {".validate": false }
+}
+},
+"$other": {".validate": false }
+}
+},
+// Players of the game
+"unit": {
+// Units account can be read by all units
+".read": "auth !== null", ~\label{firebase: unit: read}~
+// Index on team field
+".indexOn": "team",
+"$unit_id": {
+// And can be modified only by the owner unit
+".write" : "$unit_id === auth.uid", ~\label{firebase: unit: write
+}~
+// Must have username, team, role and money fields
+".validate": "newData.hasChildren(['username', 'team', 'role', 'money'])",
+// Username
+"username": {".validate": "newData.isString() && newData.val().length => 5 && newData.val().length <= 30"}, ~\label{firebase: unit: username
+}~
+
+// Team reference
+"team": { ".validate": "root.child('team/' + newData.val()).exists()"}, ~\label{firebase: unit: team
+}~
+
+// Last access time, set to now value by default, stored as timestamp
+"lastOnline": {
+".validate" : "newData.isNumber() && newData.val() >= now"}, ~\label{firebase:unit: online
+}~
+
+// Last know position
+"lastPosition": {
+~\label{
+firebase: unit: lastpos
+}~
+// Must contain latitude and longitude fields
+".validate": "newData.hasChildren(['latitude', 'longitude'])",
+// Both of type double
+"latitude": {
+".validate": "newData.isNumber()"
+},
+"longitude": {
+".validate": "newData.isNumber()"
+},
+"$other" : {".validate": false}
+},
+// Unit current zone reference
+"zone": {".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9"}, ~\label{firebase: unit: zone
+}~
+
+// Used in PREPARE, starting position at the beginning of the game
+"startPosition": {~\label{firebase: unit: startpos}~
+// Must contain latitude and longitude fields
+".validate": "newData.hasChildren(['latitude', 'longitude'])",
+// Both of type double
+"latitude": {
+".validate": "newData.isNumber()"},
+"longitude": {".validate": "newData.isNumber()"},
+"$other": {
+".validate": false
+}
+},
+
+// Used in PREPARE, say if this unit reached or not his starting position
+"ready": {".validate": "newData.isBoolean()"}, ~\label{
+firebase: unit: ready
+}~
+
+// Used in START, chosen role
+"role" : {".validate": "newData.isString() && (newData.val() === 'COP' || newData.val() === 'ASSASSIN' || newData.val() === 'BUILDER' || newData.val() === 'COLLECTOR' || newData.val() === 'UNSPECIFIED')"}, ~\label{
+firebase: unit: role
+}~
+
+// Used in START, chosen action
+"action": {".validate": "newData.isString() && (newData.val() === 'PROTECT' || newData.val() === 'CALM' || newData.val() === 'DEMOLISH' || newData.val() === 'ASSASSINATE' || newData.val() === 'BUILD' || newData.val() === 'PANIC' || newData.val() === 'COLLECT')"}, ~\label{firebase: unit: action
+}~
+
+// Used in START, money borrowed by the team
+"money": { ".validate": "newData.isNumber() && newData.val() >= 0"}, ~\label{firebase: unit: money
+}~
+
+"$other": {
+".validate": false
+}
+}
+},
+// Board zones
+"zone": {
+".read" : "auth !== null", ~\label{firebase: zone: read
+}~
+
+"$zone_id": {
+// Must have this fields
+".validate": "newData.hasChildren(['description', 'cost', 'center', 'perimeter', 'near', 'chaotic', 'units', 'buildings'])",
+// Description, must be a string with length greater than 9
+"description": {
+".validate": "newData.isString() && newData.val().length > 9"
+}, ~\label{firebase: zone: description}~
+
+// Cost to build here
+"cost": {".validate": "newData.isNumber() && newData.val() >= 0"}, ~\label{
+firebase: zone: cost
+}~
+
+// Zone center
+"center" : {~\label{firebase: zone:center
+}~
+// Must contain latitude and longitude fields
+".validate": "newData.hasChildren(['latitude', 'longitude'])",
+// Both of type double
+"latitude": { ".validate": "newData.isNumber()"},
+"longitude": {".validate": "newData.isNumber()"},
+"$other": {".validate": false}
+},
+// Zone perimeter
+"perimeter": {~\label{firebase: zone: perimeter
+}~
+"$vertex_id": {
+// Must contain latitude and longitude fields
+".validate": "newData.hasChildren(['latitude', 'longitude'])",
+// Both of type double
+"latitude": {
+".validate": "newData.isNumber()"
+},
+"longitude": {
+".validate": "newData.isNumber()"
+},
+"$other" : {".validate": false}
+}
+},
+// Near zones array
+"near" : {~\label{firebase: zone:near
+}~
+"$near_id": {
+// Check that the zone really exists
+".validate": "root.child('zone/' + $near_id).exists() && newData.isBoolean() && newData.val() === true"
+}
+},
+// Chaotic status, can be written only by who has CALM or PANIC action
+"chaotic": {~\label{firebase: zone: chaotic
+}~
+// Only the units with CALM or PANIC action can write the chaotic status of the zone
+".write": "root.child('unit/' + auth.uid + '/action').val() === 'CALM' || root.child('unit/' + auth.uid + '/action').val() === 'PANIC'",
+".validate": "newData.isBoolean()"
+},
+// Controller team reference, not present if no one is controlling the zone
+"controller": {".validate": "root.child('team/' + newData.val()).exists()"}, ~\label{firebase: zone: controller
+}~
+
+// Units
+"units": {
+~\label{
+firebase: zone: units
+}~
+"$unit_id": {
+// Only the units can update their presence in the zone
+".write": "$unit_id === auth.uid",
+// Must be a valid unit
+".validate": "root.child('unit/' + newData.val()).exists()"
+}
+},
+// Buildings
+"buildings": {
+~\label{
+firebase:zone: buildings
+}~
+"$building_id": {
+// Only units with action BUILD or DEMOLISH can write in the building section (which means to create or remove a building)
+".write": "root.child('unit/' + auth.uid + '/action').val() === 'BUILD' || root.child('unit/' + auth.uid + '/action').val() === 'DEMOLISH'",
+".validate": "newData.hasChildren(['owner'])",
+// The owner team of this building
+"owner": {".validate" : "root.child('team/' + newData.val()).exists()"},
+"$other": {".validate": false }
+}
+},
+"$other": {".validate": false }
+}
+},
+// Currently online players
+"presence": {
+// Units presence can be read by all units
+".read": "auth !== null", ~\label{firebase: presence: read}~
+
+"$unit_id": {
+// And can be modified only by the owner unit
+".write": "$unit_id === auth.uid", ~\label{firebase: presence: write}~
+
+// Check if the unit really exists
+".validate": "root.child('unit/' + $unit_id).exists() && newData.isBoolean() && newData.val() === true"
+}
+}
+}
+}

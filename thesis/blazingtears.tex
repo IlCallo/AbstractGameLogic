@@ -4,9 +4,11 @@
 % - babel
 % Other packages are explicitly forbidden by TOPtesi manual,
 % that's why they are commented below with a double %
+
+% All commented lines which start with the word "PRINT" must be decommented when the printable file is needed
 \documentclass[
-	%cucitura,				% To decomment when the printable version is needed
-	%draft,					% Comment after final revision, also hides images
+	%cucitura,				% PRINT, leave alternate bigger white margin
+	%draft,					% Comment after final revision, also hides images and listings
 	twoside]				% Print on both side of the page
 	{toptesi}				% We'll be using the toptesi class
 
@@ -30,7 +32,8 @@
 \usepackage{xcolor}			% Enhanced and standardized colors management
 \usepackage{listings}		% Coding fragments
 \usepackage{booktabs}		% Tables lines
-\usepackage{multirow}		% Permit multirow in tabular ambients
+\usepackage{multirow}		% Permits multirow in tabular ambients
+\usepackage{setspace}		% Allows to stretch text
 
 %%% PACKAGES SETUP
 
@@ -46,9 +49,9 @@
 	bookmarksopen,
 	pdfstartview={FitH},
 	colorlinks,
-	linkcolor={blue},
-	citecolor={blue},
-	urlcolor={blue}
+	linkcolor={blue},		% PRINT - change to black
+	citecolor={blue},		% PRINT - change to black
+	urlcolor={blue}			% PRINT - change to black
 }
 \addbibresource
 	{back/thesis.bib}		% Specify where to find bibliography file
@@ -77,11 +80,20 @@
 	
 	\input{front/frontispiece}
 
+	%\cleardoublepage\null\newpage	% PRINT
+
 	\input{front/abstract}
+	
+	%\cleardoublepage\null\newpage	% PRINT
+	
+	\input{front/thanks}
+	
+	%\cleardoublepage\null\newpage	% PRINT
 	
 	\input{front/index}
 	
-	\input{front/thanks}
+	%\pagenumbering{gobble}			% PRINT
+	%\cleardoublepage\null\newpage	% PRINT
 	
 	\mainmatter
 	

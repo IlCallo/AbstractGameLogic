@@ -1,0 +1,34 @@
+% The TOPtesi class loads the following packets:
+% - graphicx
+% - babel
+\documentclass{toptesi}		% We'll be using the toptesi class
+
+%%% PACKAGES USAGE
+
+\usepackage[a-1b]{pdfx}		% Pdf format: PDF/A
+\usepackage[T1]{fontenc}	% Manages accented chars in output
+\usepackage[utf8]{inputenc}	% Input encoding, accept accented chars from keyboard
+
+%%% DOCUMENT
+
+\begin{document}
+	\english
+	
+	\begin{frontespizio}
+		%% TOPFRONT ENGLISH TRANSLATIONS
+		% topfront is loaded after document begin so we must specify them here
+		\TesiDiLaurea{Master Degree Thesis}
+		\CandidateName{Candidate}
+		\AdvisorName{Supervisor}
+		\CorsoDiLaureaIn{Degree Course in }
+		
+		\ateneo{}		% Needed or the compile fails. It also remove polito name
+		\corsodilaurea{Computer Engineering}
+		\titolo{Augmented Reality applied \\ to structured recreational events}
+		\relatore{prof.\ Giovanni Malnati}
+		\sedutadilaurea{\textsc{Academic~year} 2015-2016}
+		\candidato{Paolo \textsc{Caleffi}}
+		\logosede{logopoli}
+	\end{frontespizio}
+	
+\end{document}

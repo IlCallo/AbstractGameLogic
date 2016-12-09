@@ -1,0 +1,58 @@
+% The TOPtesi class loads the following packets,
+% that's why they are commented below with a single %:
+% - graphicx
+% - babel
+% Other packages are explicitly forbidden by TOPtesi manual,
+% that's why they are commented below with a double %
+\documentclass[
+	%cucitura,				% To decomment when the printable version is needed
+	%draft,					% Comment after final revision, also hides images
+	twoside]				% Print on both side of the page
+	{toptesi}				% We'll be using the toptesi class
+
+%%% PACKAGES USAGE
+
+\usepackage[a-1b]{pdfx}		% Pdf format: PDF/A, mandatory for Polito thesis storage
+\usepackage[T1]{fontenc}	% Manages accented chars in output
+\usepackage[utf8]{inputenc}	% Input encoding, accept accented chars from keyboard
+\usepackage{amsmath,amssymb}% Math chars
+% \usepackage{graphicx}		% To include external images, loaded by toptesi class
+% \usepackage[english]{babel} % Main language of the document
+\usepackage{lipsum}			% Random text generator
+\usepackage{microtype}		% Allow some small characters to overflow the margin
+
+%%% DOCUMENT
+
+\begin{document}
+	\english
+	
+	\mainmatter
+	
+	\textbf{\LARGE{Master degree thesis summary}}
+	
+	\begin{description}
+		\item[Title] Augmented Reality applied to structured recreational events
+		\item[Candidate] Paolo Caleffi
+		\item[Supervisor] prof. Giovanni Malnati
+	\end{description}
+	
+	This thesis aim is to take the experience of boardgames and transpose it in the real world via a mobile application using an AR (Augmented Reality) framework, meanwhile finding an existing market niche in which this kind of application can be economically profitable.
+	
+	The chosen market niche is the one of structured recreational events, which lets the monetization of this project to shift away from the in-shop pay-per-win current standard dominating the market and add value to the time spent playing.  
+	From this point of view, the developed application is thought as a support for pre-organized events like the ones spreading in all the world advertised as \emph{adventures} and \emph{experiences}, usually focussed on their team-building nature: Escape Rooms, Zombie Runs, etc.
+	This kind of events are often coming from video-game culture transposed into real life: if not in the technical realization, this is more or less the same idea at the basis of AR games and for this it can be useful to analyse them while doing the same transposition operation with a boardgame.
+	
+	Currently only few AR application became really famous (Pokèmon GO being one of them) and their AR use had been studied before starting to design the game which compose the technical part of this thesis.
+	
+	The boardgame which has been chosen as base for the rule-set and mechanics is \textbf{Discworld - Ankh-Morpork}.
+	
+	The developed game is based on the concept of placing a virtual board, divided in zones, on the real world (usually a city, but it can easily be scaled and adapted to every area). On this board, the players will be the units and will cooperate to achieve the final goal of their team, moving and interacting with the game virtual objects; the first team to accomplish its objective wins the game.
+	
+	Three version of the game have been designed, starting from the most complex, which resembled a lot an RTS-AR (Real Time Strategy with Augmented Reality) game, and simplifying some mechanics to obtain an easier yet less involving one.
+	The last version is the one which has been developed, even if some parts could not be completed in time for the graduation session.
+	
+	The AR technology used for the project is the location-based one and the most important pieces of code developed are the ones which manage it: one based on the AR framework (BeyondAr), the other on a Google Maps fragment wrapped to add multiple AR features.
+	
+	Passaporta, an association which organize events for children and adults based in Reggio Emilia, have been contacted to be the tester and user of the application once it'll be finished.
+	
+\end{document}

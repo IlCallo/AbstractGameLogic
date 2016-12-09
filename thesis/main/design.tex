@@ -18,25 +18,11 @@
 			They will as well be the managers of the team money reserve, lending coins to units at the start of the turn and collecting them back at the end of it if not used.
 			A part of the role management will also depend by leaders, as described below.
 		
+		\newpage
+		
 		\subsection{Board and Zones}\label{design:board}
 		
-			Board concept has been retained unchanged from the original game, but instead of a physical one in cardboard, a virtual one is generated on-the-fly starting from given centre and radius.
-			The algorithm currently generates a pseudo-circular board with nine zones displaced in a symmetric way, with a central zone, 4 zones on the inner ring and 4 zones in the outer ring shifted by 45° with respect to the inner one.
-			
-			\begin{figure}
-				\centering
-				\includegraphics[width=.5\textwidth]{rightboard}
-				\caption{Ideal shape of the board and zones}
-			\end{figure}
-			
-			Zones all have the same area, thanks to an R simulation which calculated the right radius to use for different coordinates rings.
-			Ideally, moving from a zone centre to another one takes 5 minutes and turn duration is related to this measure: players shall make a choice between moving slightly (one zone or even staying in the same zone) and get plenty of time to perform their actions or move a lot (two or three zones) and risking to run out of time.
-			Zones grants a power-up when teams build on each of them (higher the building cost, more useful is the power-up) and they are randomly distributed on the board (e.g., the power-up disposition will be unlikely to be repeated in subsequent games).
-			Power-ups activate at the beginning of every turn.
-			
-			With a board composed by 9 zones, power-ups are defined as described in \autoref{powup:desc}; notice that some of them are referred to the role system explained in the next subsection.
-			
-			\begin{table}
+			\begin{table}[htp]
 				\caption{Power-up description}
 				\label{powup:desc}
 				\centering
@@ -53,6 +39,22 @@
 					\bottomrule
 				\end{tabular}
 			\end{table}
+		
+			Board concept has been retained unchanged from the original game, but instead of a physical one in cardboard, a virtual one is generated on-the-fly starting from given centre and radius.
+			The algorithm currently generates a pseudo-circular board with nine zones displaced in a symmetric way, with a central zone, 4 zones on the inner ring and 4 zones in the outer ring shifted by 45° with respect to the inner one.
+			
+			\begin{figure}
+				\centering
+				\includegraphics[width=.5\textwidth]{rightboard}
+				\caption{Ideal shape of the board and zones}
+			\end{figure}
+			
+			Zones all have the same area, thanks to an R simulation which calculated the right radius to use for different coordinates rings.
+			Ideally, moving from a zone centre to another one takes 5 minutes and turn duration is related to this measure: players shall make a choice between moving slightly (one zone or even staying in the same zone) and get plenty of time to perform their actions or move a lot (two or three zones) and risking to run out of time.
+			Zones grants a power-up when teams build on each of them (higher the building cost, more useful is the power-up) and they are randomly distributed on the board (e.g., the power-up disposition will be unlikely to be repeated in subsequent games).
+			Power-ups activate at the beginning of every turn.
+			
+			With a board composed by 9 zones, power-ups are defined as described in \autoref{powup:desc}; notice that some of them are referred to the role system explained in the next subsection.
 		
 		\subsection{Roles and Actions}
 		
@@ -184,6 +186,8 @@
 			\item leader participation requires a web application development and deployment to test also the units part, but this thesis is about the mobile application and the game in itself: adding it would only slow down the production;
 			\item an application entirely running on smart phone does not require providing any hardware, while using a web application 4-5 computer are needed.
 		\end{itemize}
+		
+		\newpage
 		
 		\subsection{Limited leaders}
 		

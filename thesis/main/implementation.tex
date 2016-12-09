@@ -23,6 +23,8 @@
 			Actually this constraint is more a design-driven choice than a mandatory one: all the game logic \emph{can} be realized directly on the mobile application, synchronizing between all devices, but this results in messy code and opens some security issues: not the most desirable scenario at all.
 			Considering this, the KISS (Keep It Simple, Stupid) approach had been followed and the two aspects of the game were separated.
 			
+			\newpage
+			
 			\paragraph{Game logic}
 			
 				To support the game logic, a Java task on the server will run in loop interacting with the real-time database observing the actions made by the players and eventually acting on his own to change the game internal status. In particular, it takes care of:
@@ -53,11 +55,11 @@
 		
 		The game follows a sequence of statuses, one of which is turn based (the most important, the real “gaming” part).
 	
-		\subsubsection{Inactive}
+		\paragraph{Inactive}
 		
 			It is the default value when the match has not been initialized.
 	
-		\subsubsection{Initialize}
+		\paragraph{Initialize}
 		
 			The match is being initialized; the server performs a series of ordered steps:
 			
@@ -85,16 +87,16 @@
 				\end{enumerate}
 			\end{enumerate}
 		
-		\subsubsection{Prepare}
+		\paragraph{Prepare}
 		
 			Units must reach their starting position: once everyone is within 10 meters from it all listeners on the database are initialized and the match starts.
 		
-		\subsubsection{Start}
+		\paragraph{Start}
 		\label{workflow:start}
 			
 			This is the core of the game: it is a loop which every turn execute five logical phases.
 				
-			\paragraph{Control}
+			\subparagraph{Control}
 			
 				Here the turn preparation is done: this part performs checks and status updates; it does not directly interact with the users.
 			
@@ -107,26 +109,26 @@
 				
 				Lastly, the power-ups gained by the zones on which a building had been constructed are applied.
 				
-			\paragraph{Roles}
+			\subparagraph{Roles}
 			
 				Here the roles' selection system is activated and players will choose their role for that turn following the rules explained in \autoref{nolead:role}.
 				The server will manage the timer of four minutes.
 				
-			\paragraph{Actions}
+			\subparagraph{Actions}
 				
 				After the role selection, another timer, one minute long, is set to let the players choose their action.
 				
-			\paragraph{Money}
+			\subparagraph{Money}
 				
 				Lastly, the money are borrowed by the players from team reserve as explained in \autoref{nolead:money}.
 				This phase also last one minute.
 							
-			\paragraph{Turn}
+			\subparagraph{Turn}
 			
 				Here the real game takes place: the server will keep a timer of fifteen minutes during which the players can act following their team objective or disrupting others plans.
 				Every action will be performed by the application communicating directly to the database without server interaction. This does not mean that it will stay idle: every action made, as well as every player movement, will be recorded by the server on a log file from which will be possible to run a match replay and get statistics.
 			
-		\subsubsection{End}
+		\paragraph{End}
 		
 			All players are notified that the game ended, displaying the winner team name, then a gathering location is shown and all players must reach it to meet-up with organizers and continue the event: the winner team will likely be awarded at this point with the possible prize.
 			
@@ -210,8 +212,10 @@
 				\paragraph{winner - line~\ref{firebase:game:winner}}
 				It is used during \emph{END}; it is the id of the team that won the game.
 			
-			\subsubsection{Team}
+			\newpage
 			
+			\subsubsection{Team}
+
 				\lstinputlisting[caption=Team branch rules,
 								firstline=68,
 								lastline=132]{main/listings/firebase.json}
@@ -264,7 +268,7 @@
 				The \lstinline|.read| command had to be moved out of the single unit scope, otherwise other units would be able to read every single unit branch, but not the whole list. \\
 			
 				\paragraph{username - line~\ref{firebase:unit:username}}
-				It is the unit user name, as inserted during the registration; it is used to identify the unit in many scenarios: on the map fragment, in AR activity, in the team management fragment, etc. Not to be confused with the email, needed to login and saved together with the password in the Firebase Auth system.
+				It is the user name, as inserted during the registration; it is used to identify the unit in many scenarios: on the map, in the AR activity, in the team management, etc. Not to be confused with the email, needed to login with the Firebase Auth system.
 			
 				\paragraph{team - line~\ref{firebase:unit:team}}
 				It is the reference to the team of which this unit is member; it is a redundancy, we could check every team if this user is present in the \lstinline|members| field, but in Firebase this is normal, considering the difficulty and limitation in query system.
@@ -345,6 +349,8 @@
 				\paragraph{buildings - line~\ref{firebase:zone:buildings}}
 				List of buildings constructed in this zone. Every building must have a \lstinline|owner| field which stores its owner team id. Only units which chose \emph{BUILD} or \emph{DEMOLISH} action for this turn can update data at this location (constructing or demolishing a building).
 			
+			\newpage
+			
 			\subsubsection{Presence}\label{model:presence}
 		
 				\lstinputlisting[caption=Presence branch rules,
@@ -354,7 +360,7 @@
 				This branch support the presence management system, which is discussed in more detail in \autoref{focus:presence}.
 				Everybody can read at this location, every unit can write here as well, but only in the sub-branch based on its id, as shown by line~\ref{firebase:presence:read} and~\ref{firebase:presence:write}.
 				The \lstinline|.read| command had to be moved out of the single unit scope, otherwise units would be able to read every single unit branch, but not the whole list.
-				The only value which every unit branch can assume is \lstinline|true|, which states that unit is currently on-line. Conversely, if the branch with the given unit id does not exist, the unit is off-line.
+				The only value which every unit branch can assume is \lstinline|true|, which states that unit is currently on-line. Conversely, if the branch with the given unit id does not exist, the unit is off-line. \\
 			
 		\subsection{Java/Android}
 			
@@ -421,6 +427,8 @@
 	\section{Application work flow}\label{app:workflow}
 	
 		\includegraphics[width=\textwidth]{androidflowchart}
+		
+		\newpage
 		
 		Together with the game mechanics and rules description, a prototype of the game had been prepared for Android systems and it works from API 16 onward.
 			
@@ -512,11 +520,13 @@
 			
 			Inside these loops, all points are obtained by starting from the board centre and calculating the new point based on the radius of the given ring and the offset angle which change at every iteration.
 			
-			\lstinputlisting[caption={Utility method, get new GPS position from given point, distance (ring radius) and angle}, firstline=158, lastline=171]{main/listings/boardfactory.java}
-			
 			It has to be noted that the board perimeter is not saved anywhere: only zones polygon are stored and printed upon the Google Map, for various reasons.
 			First of all, single zones polygons on the map must be saved to be able to notice click events for some in-game mechanics: getting zone data, like which teams owns its power-up, or how many other units are present in the zone.
 			Secondarily, the only feature which requires the board perimeter is the check about someone exiting it, but we can achieve the same result by checking if a position is inside any of the zones which had been saved: if it is not, the unit exited the board.
+			
+			\newpage
+			
+			\lstinputlisting[caption={Utility method, get new GPS position from given point, distance (ring radius) and angle}, firstline=158, lastline=171]{main/listings/boardfactory.java}
 			
 			\begin{figure}[htp]
 				\centering
@@ -572,6 +582,8 @@
 			
 			This ad-hoc decoder has not been developed yet, but it is easy to implement. 
 		
+		\newpage
+		
 		\subsection{Random picker}\label{focus:picker}
 		
 			\lstinputlisting[caption=Random picker class]
@@ -592,9 +604,6 @@
 			Plus, it is the recommended class to use, as written in Java 8 documentation.
 						
 		\subsection{Random point generation}\label{focus:point}
-		
-			\lstinputlisting[caption=Random point generator class]
-							{main/listings/randompoint.java}
 			
 			A method to generate random points is needed to implement most of the AR interactions; those points must usually be inside a given zone perimeter.
 			
@@ -609,6 +618,9 @@
 			Then it will get the region bounds and keep selecting a random point inside that rectangle until that point is also contained inside the given region.
 			
 			Once an acceptable point is found, it is returned wrapped in a \lstinline|GeoLocation| object.
+			
+			\lstinputlisting[caption=Random point generator class]
+			{main/listings/randompoint.java}
 		
 		\subsection{Zone control manager}\label{focus:control}
 		
@@ -664,7 +676,7 @@
 			By default, the loading layout is the visible one, considering that thanks to an auto-login feature the login layout is visible only for the first access or if an error occurs.
 			The email and password are stored in shared preferences after the first login and automatically inserted into the appropriate fields in the subsequent accesses: if both email and password are actually present, the auto-login feature is turned on.
 			
-			When auto-login is not enabled, login layout is shown in place of the loading one and the user is prompted to insert email and password, which will be then used to initialize a Firebase Auth session.
+			When auto-login is not enabled, login layout is shown in place of the loading one and the user is prompted to insert his credentials, which will be then used to initialize a Firebase Auth session.
 			
 			Firebase Auth natively provides a token-based auto-login feature, but its implementation is buggy; after the Firebase Auth system initialization, its attempt to perform it is blocked and, if needed, the home-made one is activated.
 			
@@ -738,6 +750,8 @@
 			The problems are the same for all activities, but must be managed differently based on which activity is instantiating the fragment.
 			
 			Other tasks performed by this component, either trivial or already discussed in other parts of this document, are: map customization, zones download and board drawing, team color download and markers pre-loading.
+			
+			\newpage
 			
 			\subsubsection{Location sniffer}
 			
@@ -816,6 +830,8 @@
 				This is accomplished with a rule \lstinline|HashMap<Role,Role>| which, given as key the current user role, select which role must have the other units to be visible.
 				This is a limitation but also a useful information: if you are a cop, you know that all the enemy units you are seeing in the zone are assassins, for example, and act accordingly to protect your team mates.
 				
+		\newpage
+				
 		\subsection{AR on camera}\label{focus:augmented}
 			
 		While the map is all a matter of \emph{seeing} AR objects and other units, the actual interaction with the augmented world take place in \lstinline|AugmentedActivity|.
@@ -848,6 +864,9 @@
 			\subsubsection{Interactions}\label{focus:augmented:actions}
 			
 			Interactions via the augmented reality world can assume various forms, usually some kind of mini-game, and depends from the role and action chosen by the current user.
+				
+			{ % Creates a group to stretch this content in a single page
+				\setstretch{0.87}
 			
 				\paragraph{Follow the path}
 				It is the one used for the \emph{CALM} action of the \emph{COP} and the \emph{PANIC} action of the \emph{BUILDER}, which both alter the current zone chaotic status.
@@ -872,9 +891,10 @@
 				For the assassin, the first range is 5 meters, the second one is 3 meters, the time in which he must stay within 3 meters by his target is 4 seconds. If he manages to kill his target, he cannot perform other kills for that turn. If he fails, the cool-down time is 5 seconds, after which he can retry the assassination. He can repeat this until he succeeds or the \emph{TURN} phase timer expires.
 				When the assassin select a target, his phone will emit a sound to alert him and, if he is using the application in that moment, the screen will reflect the danger situation.
 				
-				
 				\paragraph{Perform gestures}
 				It is the one used for the \emph{BUILD} action of the \emph{BUILDER} and the \emph{DEMOLISH} action of the \emph{ASSASSIN}, both related to the buildings' mechanism.
 				This kind of interaction must keep who performs it occupied for 1 minute and half or more, giving the importance that these actions have on the game in many of its parts (power-ups management, the money usage, the control of a zone, etc.) and consist in a random flow of different gestures which must be executed by the player. If the gesture is executed correctly and with the right timing, it scores a point (or more points in case of combos), if it does mistakes, it loses a point. While this points pool increase, the building object is shown to grow/spoil, depending on the action, on the AR layer, and when it reaches a certain value (150 for example), the building is completed/destroyed and is added/removed from the database and map.
 				Gestures can vary from simple touch and swipes to more advanced and particular once, like touch-less gestures and blow recognition offered by some SDKs\footnote{Snapback (http://www.snapback.io/), even if not yet publicly available, can be an interesting partner to add not standard gestures.}.
 				Buildings can be constructed only within a radius of 30 meters from the zone centre.
+				
+			}
